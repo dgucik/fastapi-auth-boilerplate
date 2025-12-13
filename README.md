@@ -2,6 +2,8 @@
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Containerized-Docker-blue?logo=docker)
 ![Poetry](https://img.shields.io/badge/Poetry-Managed-blueviolet?logo=poetry&logoColor=white)
 ![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black)
 ![Type Checker](https://img.shields.io/badge/Type%20Checker-Mypy-blue)
@@ -78,8 +80,9 @@ src/
 
 ### Prerequisites
 
-* Python 3.12+
-* [Poetry](https://python-poetry.org/) (Dependency Manager)
+* **Python:** Version 3.12 or newer.
+* **Poetry:** (Dependency Management) Tool for installing and isolating project dependencies.
+* **Docker & Docker Compose:** (Local Environment) Required for running the PostgreSQL database and other services locally.
 
 ### Installation
 
@@ -105,20 +108,26 @@ src/
     cp .env.example .env
     ```
 
-5.  **Run Migrations (Alembic):**
+### Running the Application
+
+1.  **Start the local database (PostgreSQL):**
+    The project uses Docker Compose to run the required PostgreSQL service.
+    ```bash
+    docker compose up -d
+    ```
+
+2.  **Run Database Migrations (Alembic):**
+    Apply the database schema changes:
     ```bash
     alembic upgrade head
     ```
 
-### Running the Application
+3.  **Start the development server with hot-reload:**
+    ```bash
+    uvicorn src.main:app --reload
+    ```
 
-Start the development server with hot-reload:
-
-```bash
-uvicorn src.main:app --reload
-```
-
-API Documentation (Swagger UI): [http://localhost:8000/docs](http://localhost:8000/docs)
+* **API Documentation (Swagger UI):** `http://localhost:8000/docs`
 
 ## 📄 License
 
