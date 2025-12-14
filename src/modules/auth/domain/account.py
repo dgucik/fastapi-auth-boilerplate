@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from shared.domain.primitives import AggregateRoot
-
+from auth.domain.events import AccountRegistered
 from auth.domain.exceptions import AccountNotVerifiedException, InvalidPasswordException
 from auth.domain.interfaces import PasswordHasher
 from auth.domain.value_objects import Email, PlainPassword
+from shared.domain.primitives import AggregateRoot
 
 
 @dataclass
@@ -26,6 +26,10 @@ class Account(AggregateRoot):
     ) -> "Account":
         new_account = cls(id=id, email=email)
         new_account.set_password(plain_password, hasher)
+
+        new_account._events.append(
+            AccountRegistered(account_id=new_account.id, email=new_account.email)
+        )
 
         return new_account
 

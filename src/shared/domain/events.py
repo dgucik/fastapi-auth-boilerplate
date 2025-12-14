@@ -6,5 +6,5 @@ from datetime import datetime
 
 @dataclass(frozen=True)
 class DomainEvent(ABC):
-    event_id: uuid.UUID = field(default_factory=uuid.uuid4)
-    occurred_at: datetime = field(default_factory=datetime.utcnow)
+    event_id: uuid.UUID = field(default_factory=uuid.uuid4, init=False)
+    occurred_at: datetime = field(default_factory=datetime.utcnow, init=False)
