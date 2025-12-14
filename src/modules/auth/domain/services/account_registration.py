@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from auth.domain.account import Account, Email, PlainPassword
+from auth.domain.account import Account
 from auth.domain.exceptions import EmailAlreadyExistsException
 from auth.domain.interfaces import PasswordHasher
 from auth.domain.repositories import AccountRepository
+from auth.domain.value_objects import Email, PlainPassword
 
 
 class AccountRegistrationService:
@@ -12,12 +13,12 @@ class AccountRegistrationService:
 
     async def register(
         self,
-        repository: AccountRepository,
+        repo: AccountRepository,
         id: UUID,
         email: Email,
         password: PlainPassword,
     ) -> Account:
-        if await repository.get_by_email(email):
+        if await repo.get_by_email(email):
             raise EmailAlreadyExistsException
 
         return Account.create(

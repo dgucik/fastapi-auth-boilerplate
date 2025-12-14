@@ -13,8 +13,13 @@ class Query:
     pass
 
 
+@dataclass(frozen=True)
+class Dto:
+    pass
+
+
 TMessage = TypeVar("TMessage", bound=Command | Query)
-TResult = TypeVar("TResult")
+TResult = TypeVar("TResult", bound=Dto | None)
 
 
 class Handler(Generic[TMessage, TResult], ABC):
