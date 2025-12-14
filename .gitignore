@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Logs / coverage
+*.log
+logs/
+.coverage
+htmlcov/
+
+# Uvicorn / Gunicorn
+uvicorn.log
+gunicorn.log
+
+# Alembic
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
+alembic.ini.local
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Databases
+*.sqlite3
+*.db
+
+# Testing / type checking
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# Linters / formatters
+.cache/
+.black_cache/
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
