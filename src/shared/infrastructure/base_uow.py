@@ -2,7 +2,7 @@ from types import TracebackType
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from shared.application.interfaces import UnitOfWork
+from shared.application.uow import UnitOfWork
 from shared.infrastructure.exceptions import SessionNotInitializedException
 
 
@@ -31,12 +31,10 @@ class BaseSqlAlchemyUnitOfWork(UnitOfWork):
         if not self._session:
             raise SessionNotInitializedException
 
-        if self._session:
-            await self._session.commit()
+        await self._session.commit()
 
     async def rollback(self) -> None:
         if not self._session:
             raise SessionNotInitializedException
 
-        if self._session:
-            await self._session.rollback()
+        await self._session.rollback()
