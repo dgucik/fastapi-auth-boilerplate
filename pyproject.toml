@@ -10,6 +10,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
+    "sqlalchemy (>=2.0.45,<3.0.0)"
 ]
 
 [build-system]
@@ -30,23 +31,12 @@ dev = [
 [tool.ruff]
 line-length = 88
 target-version = "py312"
+select = ["E", "F", "I", "UP", "B", "S"]
+extend-ignore = ["D100", "D104", "D105", "D106", "D107"]
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "S", "D"]
-
-ignore = [
-    "S101",
-]
-
-[tool.ruff.lint.pydocstyle]
+[tool.ruff.pydocstyle]
 convention = "google"
-ignore = [
-    "D100",
-    "D104",
-    "D105",
-    "D106",
-    "D107",
-]
+
 
 [tool.mypy]
 python_version = "3.12"
