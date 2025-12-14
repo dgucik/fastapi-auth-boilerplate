@@ -1,7 +1,6 @@
 from typing import Generic
 
-from shared.application.interfaces import Handler, MessageBus
-from shared.application.primitives import TMessage, TResult
+from shared.application.cqrs import Handler, MessageBus, TMessage, TResult
 from shared.infrastructure.exceptions import BusException
 
 

@@ -1,18 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Generic
-
-if TYPE_CHECKING:
-    from shared.application.primitives import TMessage, TResult
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 
-class UnitOfWork(ABC):
-    @abstractmethod
-    async def commit(self) -> None:
-        pass
+@dataclass(frozen=True)
+class Command:
+    pass
 
-    @abstractmethod
-    async def rollback(self) -> None:
-        pass
+
+@dataclass(frozen=True)
+class Query:
+    pass
+
+
+TMessage = TypeVar("TMessage", bound=Command | Query)
+TResult = TypeVar("TResult")
 
 
 class Handler(Generic[TMessage, TResult], ABC):
