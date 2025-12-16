@@ -61,7 +61,7 @@ python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
-mypy_path = ["src"]
+mypy_path = ["src", "src/modules"]
 namespace_packages = true
 explicit_package_bases = true
 
