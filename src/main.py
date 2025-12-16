@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from config import close_db_connection
+from .config import close_db_connection
 
 
 @asynccontextmanager
