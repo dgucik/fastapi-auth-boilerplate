@@ -13,8 +13,8 @@ class Email(ValueObject):
     def __post_init__(self) -> None:
         try:
             validate_email(self.value, check_deliverability=False)
-        except Exception as err:
-            raise InvalidEmailException from err
+        except Exception as e:
+            raise InvalidEmailException from e
 
     def __str__(self) -> str:
         return self.value

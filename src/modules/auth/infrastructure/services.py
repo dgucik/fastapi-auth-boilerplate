@@ -49,10 +49,10 @@ class JWTTokenService(TokenService):
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return str(payload.get("sub"))
-        except ExpiredSignatureError as err:
-            raise TokenExpiredException from err
-        except JWTError as err:
-            raise InvalidTokenException from err
+        except ExpiredSignatureError as e:
+            raise TokenExpiredException from e
+        except JWTError as e:
+            raise InvalidTokenException from e
 
     @property
     def refresh_token_expires_in(self) -> int:

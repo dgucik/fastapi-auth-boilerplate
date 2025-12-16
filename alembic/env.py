@@ -28,10 +28,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from config import Base, get_settings  # noqa
-from modules.auth.infrastructure.database.models import AccountModel # noqa
-
-settings = get_settings()
+from config import Base, settings  # noqa
+from auth.infrastructure.database.models import AccountModel # noqa
 
 target_metadata = [Base.metadata]
 

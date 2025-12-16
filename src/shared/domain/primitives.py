@@ -1,10 +1,8 @@
 import uuid
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from shared.domain.events import DomainEvent
+from shared.domain.events import DomainEvent
 
 
 @dataclass(frozen=True)
