@@ -2,14 +2,23 @@ from functools import lru_cache
 from typing import Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
+    AsyncEngine,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase
 
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str
+    # Database Connection Params
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str
+
     DB_ECHO: bool = False
 
     # JWT
@@ -20,10 +29,20 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # Pydantic
+    # Pydantic Configuration
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore", case_sensitive=True
     )
+
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        """Constructs the SQLAlchemy URL from individual settings."""
+        return (
+            f"postgresql+asyncpg://"
+            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
+            f"{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/"
+            f"{self.POSTGRES_DB}"
+        )
 
 
 @lru_cache
@@ -35,23 +54,13 @@ settings = get_settings()
 
 # --- Database Setup ---
 
-connect_args = {}
-# SQLite specific: Allow access from different threads in async mode
-if "sqlite" in settings.DATABASE_URL:
-    connect_args["check_same_thread"] = False
+connect_args: dict[str, Any] = {}
 
-engine = create_async_engine(
-    settings.DATABASE_URL, echo=settings.DB_ECHO, connect_args=connect_args
+engine: AsyncEngine = create_async_engine(
+    settings.sqlalchemy_database_url,  # Używamy dynamicznie generowanego URL
+    echo=settings.DB_ECHO,
+    connect_args=connect_args,
 )
-
-# SQLite specific: Enforce Foreign Key constraints (disabled by default in SQLite)
-if "sqlite" in settings.DATABASE_URL:
-
-    @event.listens_for(engine.sync_engine, "connect")
-    def enable_sqlite_fks(dbapi_connection: Any, connection_record: Any) -> None:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
 
 
 async_session_factory = async_sessionmaker(
