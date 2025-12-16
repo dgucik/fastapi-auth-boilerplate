@@ -3,4 +3,4 @@ from shared.application.uow import UnitOfWork
 
 
 class AuthUnitOfWork(UnitOfWork):
-    accounts: AccountRepository
+    accounts: AccountRepository | None

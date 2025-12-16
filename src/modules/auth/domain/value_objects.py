@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
 from email_validator import validate_email
-from shared.domain.primitives import ValueObject
 
 from auth.domain.exceptions import InvalidEmailException, PasswordTooWeakException
+from shared.domain.primitives import ValueObject
 
 
 @dataclass(frozen=True)

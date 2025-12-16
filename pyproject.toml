@@ -11,7 +11,10 @@ license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "sqlalchemy (>=2.0.45,<3.0.0)",
-    "email-validator (>=2.3.0,<3.0.0)"
+    "email-validator (>=2.3.0,<3.0.0)",
+    "passlib (>=1.7.4,<2.0.0)",
+    "python-jose[cryptography] (>=3.5.0,<4.0.0)",
+    "pydantic (>=2.12.5,<3.0.0)"
 ]
 
 [build-system]
@@ -25,6 +28,9 @@ dev = [
     "pre-commit (>=4.5.0,<5.0.0)"
 ]
 
+[tool.poetry]
+package-mode = false
+
 # =========================================================
 # Linter & Formatter
 # =========================================================
@@ -34,17 +40,26 @@ line-length = 88
 target-version = "py312"
 select = ["E", "F", "I", "UP", "B", "S"]
 extend-ignore = ["D100", "D104", "D105", "D106", "D107"]
+src = ["src"]
 
 [tool.ruff.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.isort]
+known-first-party = ["auth", "config", "shared"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
-mypy_path = ["src"]
+mypy_path = ["src", "src/modules"]
+namespace_packages = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["passlib.*", "jose.*"]
+ignore_missing_imports = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
