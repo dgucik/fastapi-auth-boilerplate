@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from auth.domain.account import Account
+from auth.domain.entities.account import Account
 from auth.domain.exceptions import EmailAlreadyExistsException
 from auth.domain.interfaces import PasswordHasher
 from auth.domain.repositories import AccountRepository

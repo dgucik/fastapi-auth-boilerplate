@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from auth.domain.account import Account
+from auth.domain.entities.account import Account
 from auth.domain.value_objects import Email
 
 

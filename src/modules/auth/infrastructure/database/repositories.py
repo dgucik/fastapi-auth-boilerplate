@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import Result, Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.domain.account import Account
+from auth.domain.entities.account import Account
 from auth.domain.repositories import AccountRepository
 from auth.domain.value_objects import Email
 from auth.infrastructure.database.models import AccountModel
