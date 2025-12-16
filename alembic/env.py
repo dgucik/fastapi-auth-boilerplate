@@ -29,6 +29,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from config import Base, get_settings  # noqa
+from modules.auth.infrastructure.database.models import AccountModel # noqa
 
 settings = get_settings()
 
