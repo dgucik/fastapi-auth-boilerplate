@@ -1,8 +1,8 @@
 from shared.application.cqrs import (
     Command,
+    CqrsBus,
     Dto,
     Handler,
-    MessageBus,
     Query,
     TMessage,
     TResult,
@@ -10,7 +10,7 @@ from shared.application.cqrs import (
 from shared.infrastructure.exceptions import BusException
 
 
-class GenericMessageBus(MessageBus[TMessage, TResult]):
+class GenericCqrsBus(CqrsBus[TMessage, TResult]):
     def __init__(self, handlers: dict[type[TMessage], Handler[TMessage, TResult]]):
         self._handlers = handlers
 
@@ -21,9 +21,9 @@ class GenericMessageBus(MessageBus[TMessage, TResult]):
         return await handler.handle(command)
 
 
-class CommandBus(GenericMessageBus[Command, None]):
+class CommandBus(GenericCqrsBus[Command, None]):
     pass
 
 
-class QueryBus(GenericMessageBus[Query, Dto]):
+class QueryBus(GenericCqrsBus[Query, Dto]):
     pass

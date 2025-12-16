@@ -28,7 +28,7 @@ class Handler(Generic[TMessage, TResult], ABC):
         pass
 
 
-class MessageBus(Generic[TMessage, TResult], ABC):
+class CqrsBus(Generic[TMessage, TResult], ABC):
     @abstractmethod
     async def dispatch(self, message: TMessage) -> TResult:
         pass
