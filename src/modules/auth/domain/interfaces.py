@@ -23,7 +23,7 @@ class TokenService(ABC):
         pass
 
     @abstractmethod
-    def decode_token(self, token: str) -> str:
+    def decode_token(self, token: str, token_type: str) -> str:
         pass
 
     @property
