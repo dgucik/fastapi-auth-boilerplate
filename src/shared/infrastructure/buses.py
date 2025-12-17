@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from shared.application.cqrs import (
     Command,
     CqrsBus,
@@ -7,6 +9,8 @@ from shared.application.cqrs import (
     TMessage,
     TResult,
 )
+from shared.application.event_handling import DomainEventHandler, EventBus
+from shared.domain.events import DomainEvent
 from shared.infrastructure.exceptions import BusException
 
 
@@ -27,3 +31,22 @@ class CommandBus(GenericCqrsBus[Command, None]):
 
 class QueryBus(GenericCqrsBus[Query, Dto]):
     pass
+
+
+class InMemoryDomainEventBus(EventBus[DomainEvent]):
+    def __init__(
+        self,
+        subscribers: dict[
+            type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
+        ]
+        | None = None,
+    ):
+        self._subscribers: dict[
+            type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
+        ] = subscribers or {}
+
+    async def publish(self, event: DomainEvent) -> None:
+        handler_factories = self._subscribers.get(type(event), [])
+        for handler_factory in handler_factories:
+            handler = handler_factory()
+            await handler.handle(event)

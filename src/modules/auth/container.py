@@ -5,19 +5,39 @@ from dependency_injector import containers, providers
 
 from auth.application.commands.login import LoginCommand, LoginHandler
 from auth.application.commands.register import RegisterCommand, RegisterHandler
+from auth.application.events.send_welcome_email import SendWelcomeEmail
+from auth.domain.events import AccountRegistered
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.infrastructure.database.uow import SqlAlchemyUnitOfWork
 from auth.infrastructure.services import BcryptPasswordHasher, JWTTokenService
-from shared.infrastructure.buses import CommandBus
+from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
 
 
 class AuthContainer(containers.DeclarativeContainer):
     settings = providers.Configuration()
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
+    # --- Event Bus ---
+    domain_event_bus = providers.Singleton(InMemoryDomainEventBus)
+
     # --- Database ---
-    uow = providers.Factory(SqlAlchemyUnitOfWork, session_factory=session_factory)
+    uow = providers.Factory(
+        SqlAlchemyUnitOfWork,
+        session_factory=session_factory,
+        event_bus=domain_event_bus,
+    )
+
+    # --- Event Handlers ---
+    send_welcome_email_handler = providers.Factory(SendWelcomeEmail)
+
+    domain_event_bus.add_kwargs(
+        subscribers=providers.Dict(
+            {
+                AccountRegistered: providers.List(send_welcome_email_handler.provider),
+            }
+        )
+    )
 
     # --- Services ---
     hasher = providers.Singleton(BcryptPasswordHasher)

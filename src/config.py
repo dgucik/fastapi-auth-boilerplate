@@ -1,3 +1,4 @@
+from asyncio import current_task
 from functools import lru_cache
 from typing import Any
 
@@ -5,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
     AsyncEngine,
+    async_scoped_session,
     async_sessionmaker,
     create_async_engine,
 )
@@ -57,14 +59,19 @@ settings = get_settings()
 connect_args: dict[str, Any] = {}
 
 engine: AsyncEngine = create_async_engine(
-    settings.sqlalchemy_database_url,  # Używamy dynamicznie generowanego URL
+    settings.sqlalchemy_database_url,
     echo=settings.DB_ECHO,
     connect_args=connect_args,
 )
 
 
-async_session_factory = async_sessionmaker(
+_async_session_factory = async_sessionmaker(
     bind=engine, autoflush=False, expire_on_commit=False
+)
+
+scoped_session_factory = async_scoped_session(
+    session_factory=_async_session_factory,
+    scopefunc=current_task,
 )
 
 
