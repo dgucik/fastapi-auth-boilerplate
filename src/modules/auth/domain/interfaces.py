@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from enum import StrEnum
 
 
 class PasswordHasher(ABC):
@@ -13,6 +14,11 @@ class PasswordHasher(ABC):
         pass
 
 
+class TokenScope(StrEnum):
+    ACCESS = "access"
+    REFRESH = "refresh"
+
+
 class TokenService(ABC):
     @abstractmethod
     def create_access_token(self, subject: str) -> str:
@@ -23,7 +29,7 @@ class TokenService(ABC):
         pass
 
     @abstractmethod
-    def decode_token(self, token: str, token_type: str) -> str:
+    def decode_token(self, token: str, token_type: TokenScope) -> str:
         pass
 
     @property

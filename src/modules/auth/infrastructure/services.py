@@ -4,7 +4,7 @@ from typing import Final
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 
-from auth.domain.interfaces import PasswordHasher, TokenService
+from auth.domain.interfaces import PasswordHasher, TokenScope, TokenService
 from auth.infrastructure.exceptions import InvalidTokenException, TokenExpiredException
 
 BCRYPT_MAX_LENGTH: Final[int] = 72
@@ -39,25 +39,25 @@ class JWTTokenService(TokenService):
         return self._create_token(
             subject=subject,
             expires_delta=timedelta(minutes=self.access_expire_minutes),
-            token_type="access",  # noqa: S106
+            token_type=TokenScope.ACCESS,
         )
 
     def create_refresh_token(self, subject: str) -> str:
         return self._create_token(
             subject=subject,
             expires_delta=timedelta(days=self.refresh_expire_days),
-            token_type="refresh",  # noqa: S106
+            token_type=TokenScope.REFRESH,
         )
 
     def _create_token(
-        self, subject: str, expires_delta: timedelta, token_type: str
+        self, subject: str, expires_delta: timedelta, token_type: TokenScope
     ) -> str:
         expire = datetime.now(UTC) + expires_delta
         to_encode = {"exp": expire, "sub": str(subject), "type": token_type}
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return str(encoded_jwt)
 
-    def decode_token(self, token: str, expected_type: str) -> str:
+    def decode_token(self, token: str, expected_type: TokenScope) -> str:
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
 
