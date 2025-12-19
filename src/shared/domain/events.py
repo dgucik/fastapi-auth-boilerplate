@@ -1,10 +1,15 @@
-import uuid
-from abc import ABC
-from dataclasses import dataclass, field
-from datetime import datetime
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
-class DomainEvent(ABC):
-    event_id: uuid.UUID = field(default_factory=uuid.uuid4, init=False)
-    occurred_at: datetime = field(default_factory=datetime.utcnow, init=False)
+class Event(ABC):
+    @abstractmethod
+    def to_dict(self) -> dict[str, Any]:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Event":
+        pass

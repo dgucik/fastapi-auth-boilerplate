@@ -8,9 +8,10 @@ from auth.domain.entities.account import Account
 from auth.domain.repositories import AccountRepository
 from auth.domain.value_objects import Email
 from auth.infrastructure.database.models import AccountModel
+from shared.infrastructure.repositories import BaseRepository
 
 
-class SqlAlchemyAccountRepository(AccountRepository):
+class SqlAlchemyAccountRepository(AccountRepository, BaseRepository[Account]):
     def __init__(self, session: AsyncSession):
         self._session = session
 
@@ -23,17 +24,19 @@ class SqlAlchemyAccountRepository(AccountRepository):
         return await self._execute(stmt)
 
     async def add(self, account: Account) -> None:
+        self._register(account)
         account_model = self._to_model(account)
         self._session.add(account_model)
 
     def _to_domain(self, account_model: AccountModel) -> Account:
-        return Account(
+        account = Account(
             id=account_model.id,
             email=Email(value=account_model.email),
             _password_hash=account_model.password_hash,
             is_verified=account_model.is_verified,
             is_superuser=account_model.is_superuser,
         )
+        return self._register(account)
 
     def _to_model(self, account: Account) -> AccountModel:
         return AccountModel(

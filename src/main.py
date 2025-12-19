@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
@@ -20,7 +21,24 @@ async def db_session_middleware(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    container: AppContainer = app.state.container
+
+    outbox_tasks = []
+
+    auth_processor = container.auth().outbox_processor()
+    outbox_tasks.append(
+        asyncio.create_task(
+            auth_processor.run_forever(interval=0.5), name="auth_outbox"
+        )
+    )
+
     yield
+
+    for task in outbox_tasks:
+        task.cancel()
+
+    if outbox_tasks:
+        await asyncio.gather(*outbox_tasks, return_exceptions=True)
 
     await close_db_connection()
 

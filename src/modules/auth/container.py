@@ -10,30 +10,42 @@ from auth.application.commands.request_verification_token import (
     RequestVerificationTokenHandler,
 )
 from auth.application.events.send_verification_mail import SendVerificationMail
-from auth.domain.events import VerificationRequested
+from auth.domain.events import AccountRegistered, VerificationRequested
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
+from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.uow import SqlAlchemyUnitOfWork
 from auth.infrastructure.services import (
     AioSmtpMailSender,
     BcryptPasswordHasher,
     JWTTokenManager,
 )
-from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
+from shared.infrastructure.buses import CommandBus, InMemoryEventBus
+from shared.infrastructure.event_registry import EventRegistryImpl
+from shared.infrastructure.outbox_processor import OutboxProcessor
 
 
 class AuthContainer(containers.DeclarativeContainer):
     settings = providers.Configuration()
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
-    # --- Event Bus ---
-    domain_event_bus = providers.Singleton(InMemoryDomainEventBus)
+    # --- Event Bus & Event Registry ---
+    in_mem_event_bus = providers.Singleton(InMemoryEventBus)
 
-    # --- Database ---
+    event_registry = providers.Singleton(
+        EventRegistryImpl,
+        events=[
+            VerificationRequested,
+            AccountRegistered,
+        ],
+    )
+
+    # --- Unit of Work ---
     uow = providers.Factory(
         SqlAlchemyUnitOfWork,
         session_factory=session_factory,
-        event_bus=domain_event_bus,
+        event_bus=in_mem_event_bus,
+        event_registry=event_registry,
     )
 
     # --- Infra Services ---
@@ -51,7 +63,6 @@ class AuthContainer(containers.DeclarativeContainer):
     mail_sender = providers.Singleton(AioSmtpMailSender, config=settings.mail)
 
     # --- Domain Services ---
-
     account_registration_service = providers.Factory(
         AccountRegistrationService, hasher=hasher
     )
@@ -60,7 +71,7 @@ class AuthContainer(containers.DeclarativeContainer):
         AccountAuthenticationService, hasher=hasher, token_manager=token_manager
     )
 
-    # Commands
+    # --- Commands & Handlers ---
     register_handler = providers.Factory(
         RegisterHandler, uow=uow, service=account_registration_service
     )
@@ -81,6 +92,7 @@ class AuthContainer(containers.DeclarativeContainer):
         }
     )
 
+    # -- Command Bus ---
     command_bus = providers.Factory(CommandBus, handlers=command_handlers)
 
     # --- Event Handlers ---
@@ -91,7 +103,8 @@ class AuthContainer(containers.DeclarativeContainer):
         base_url=settings.APP_BASE_URL,
     )
 
-    domain_event_bus.add_kwargs(
+    # --- Event Bus Subscribers Registration ---
+    in_mem_event_bus.add_kwargs(
         subscribers=providers.Dict(
             {
                 VerificationRequested: providers.List(
@@ -99,4 +112,14 @@ class AuthContainer(containers.DeclarativeContainer):
                 ),
             }
         )
+    )
+
+    # --- Outbox processor ---
+    outbox_processor = providers.Singleton(
+        OutboxProcessor,
+        session_factory=session_factory,
+        bus=in_mem_event_bus,
+        registry=event_registry,
+        outbox_model=providers.Object(AuthOutboxEvent),
+        batch_size=20,
     )

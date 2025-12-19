@@ -1,9 +1,9 @@
 from auth.domain.events import VerificationRequested
 from auth.domain.interfaces import MailSender, TokenManager
-from shared.application.event_handling import DomainEventHandler
+from shared.application.event_handling import EventHandler
 
 
-class SendVerificationMail(DomainEventHandler[VerificationRequested]):
+class SendVerificationMail(EventHandler[VerificationRequested]):
     def __init__(
         self, token_manager: TokenManager, mail_sender: MailSender, base_url: str
     ) -> None:
@@ -17,9 +17,8 @@ class SendVerificationMail(DomainEventHandler[VerificationRequested]):
         )
         verification_link = f"{self._base_url}/verify?token={token}"
         subject = "Please verify your email address"
-        print(event, flush=True)
         await self._mail_sender.send_mail(
-            recipients=["danielgucik7@gmail.com"],
+            recipients=[event.email.value],
             subject=subject,
             verification_link=verification_link,
             verification_token_expires_in_minutes=self._token_manager.verification_token_expires_in_minutes,

@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from config import Base
+from shared.infrastructure.outbox_mixin import OutboxMixin
 
 
 class AccountModel(Base):
@@ -16,3 +17,7 @@ class AccountModel(Base):
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class AuthOutboxEvent(Base, OutboxMixin):
+    __tablename__ = "auth_outbox_events"

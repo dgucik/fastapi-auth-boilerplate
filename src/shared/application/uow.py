@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from types import TracebackType
+from typing import Any
 
 
 class UnitOfWork(ABC):
@@ -22,4 +23,8 @@ class UnitOfWork(ABC):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        pass
+
+    @abstractmethod
+    def _get_outbox_model(self) -> Any:
         pass
