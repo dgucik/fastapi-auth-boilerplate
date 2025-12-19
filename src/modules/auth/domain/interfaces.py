@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import StrEnum
 
 
@@ -20,7 +21,18 @@ class TokenScope(StrEnum):
     VERIFICATION = "verification"
 
 
+@dataclass(frozen=True)
+class AuthenticationResult:
+    access_token: str
+    refresh_token: str
+    refresh_token_expires_in_seconds: int
+
+
 class TokenManager(ABC):
+    @abstractmethod
+    def issue_auth_tokens(self, subject: str) -> AuthenticationResult:
+        pass
+
     @abstractmethod
     def create_access_token(self, subject: str) -> str:
         pass

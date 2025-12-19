@@ -35,6 +35,8 @@ class LoginHandler(Handler[LoginCommand, LoginDto]):
                 self._uow.accounts, email_vo, plain_password_vo
             )
 
+            await self._uow.commit()
+
         return LoginDto(
             response.access_token,
             response.refresh_token,

@@ -7,8 +7,6 @@ TDomainEvent = TypeVar("TDomainEvent", bound=DomainEvent)
 
 
 class DomainEventHandler(ABC, Generic[TDomainEvent]):
-    is_async: bool = False
-
     @abstractmethod
     async def handle(self, event: TDomainEvent) -> None:
         pass
@@ -16,5 +14,5 @@ class DomainEventHandler(ABC, Generic[TDomainEvent]):
 
 class DomainEventBus(ABC):
     @abstractmethod
-    async def publish(self, event: DomainEvent, only_async: bool = False) -> None:
+    async def publish(self, event: DomainEvent) -> None:
         pass

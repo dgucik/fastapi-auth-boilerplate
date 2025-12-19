@@ -3,10 +3,21 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from auth.api.responses import LoginResponse, RegisterResponse
-from auth.api.schemas import LoginRequest, RegisterRequest
+from auth.api.responses import (
+    LoginResponse,
+    RegisterResponse,
+    RequestVerificationTokenResponse,
+)
+from auth.api.schemas import (
+    LoginRequest,
+    RegisterRequest,
+    RequestVerificationTokenRequest,
+)
 from auth.application.commands.login import LoginCommand, LoginDto
 from auth.application.commands.register import RegisterCommand
+from auth.application.commands.request_verification_token import (
+    RequestVerificationTokenCommand,
+)
 from auth.container import AuthContainer
 from auth.domain.exceptions import AccountNotVerifiedException, InvalidPasswordException
 from shared.application.exceptions import ApplicationException
@@ -68,8 +79,34 @@ async def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
         ) from e
+
     except AccountNotVerifiedException as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from e
+    except (DomainException, ApplicationException) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
+
+
+@router.post(
+    "/request-verify-token",
+    response_model=RequestVerificationTokenResponse,
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def request_verification_token(
+    request: RequestVerificationTokenRequest,
+    response: Response,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+) -> RequestVerificationTokenResponse:
+    try:
+        command = RequestVerificationTokenCommand(email=request.email)
+
+        await command_bus.dispatch(command)
+
+        return RequestVerificationTokenResponse(
+            message="Verification email sent successfully."
+        )
     except (DomainException, ApplicationException) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)

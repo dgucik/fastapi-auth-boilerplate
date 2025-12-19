@@ -17,4 +17,4 @@ class LoginRequest(BaseModel):
 
 
 class RequestVerificationTokenRequest(BaseModel):
-    pass
+    email: EmailStr

@@ -8,7 +8,13 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 
-from auth.domain.interfaces import MailSender, PasswordHasher, TokenManager, TokenScope
+from auth.domain.interfaces import (
+    AuthenticationResult,
+    MailSender,
+    PasswordHasher,
+    TokenManager,
+    TokenScope,
+)
 from auth.infrastructure.exceptions import InvalidTokenException, TokenExpiredException
 from config import MailSettings
 
@@ -41,6 +47,15 @@ class JWTTokenManager(TokenManager):
         self.access_expire_minutes = access_expire_minutes
         self.refresh_expire_days = refresh_expire_days
         self.verification_expire_minutes = verification_expire_minutes
+
+    def issue_auth_tokens(self, subject: str) -> AuthenticationResult:
+        access_token = self.create_access_token(subject)
+        refresh_token = self.create_refresh_token(subject)
+        refresh_token_expires_in_seconds = self.refresh_token_expires_in_seconds
+
+        return AuthenticationResult(
+            access_token, refresh_token, refresh_token_expires_in_seconds
+        )
 
     def create_access_token(self, subject: str) -> str:
         return self._create_token(

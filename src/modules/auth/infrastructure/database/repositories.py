@@ -24,7 +24,6 @@ class SqlAlchemyAccountRepository(AccountRepository):
 
     async def add(self, account: Account) -> None:
         account_model = self._to_model(account)
-        account_model.domain_events = account.pull_events()
         self._session.add(account_model)
 
     def _to_domain(self, account_model: AccountModel) -> Account:

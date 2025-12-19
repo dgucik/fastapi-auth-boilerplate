@@ -5,6 +5,10 @@ from dependency_injector import containers, providers
 
 from auth.application.commands.login import LoginCommand, LoginHandler
 from auth.application.commands.register import RegisterCommand, RegisterHandler
+from auth.application.commands.request_verification_token import (
+    RequestVerificationTokenCommand,
+    RequestVerificationTokenHandler,
+)
 from auth.application.events.send_verification_mail import SendVerificationMail
 from auth.domain.events import VerificationRequested
 from auth.domain.services.account_authentication import AccountAuthenticationService
@@ -65,8 +69,16 @@ class AuthContainer(containers.DeclarativeContainer):
         LoginHandler, uow=uow, service=account_authentication_service
     )
 
+    request_verification_token_handler = providers.Factory(
+        RequestVerificationTokenHandler, uow=uow
+    )
+
     command_handlers = providers.Dict(
-        {RegisterCommand: register_handler, LoginCommand: login_handler}
+        {
+            RegisterCommand: register_handler,
+            LoginCommand: login_handler,
+            RequestVerificationTokenCommand: request_verification_token_handler,
+        }
     )
 
     command_bus = providers.Factory(CommandBus, handlers=command_handlers)
