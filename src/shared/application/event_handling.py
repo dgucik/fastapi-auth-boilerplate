@@ -3,20 +3,18 @@ from typing import Generic, TypeVar
 
 from shared.domain.events import DomainEvent
 
-TEvent = TypeVar("TEvent", bound=DomainEvent)
+TDomainEvent = TypeVar("TDomainEvent", bound=DomainEvent)
 
 
-class EventHandler(ABC, Generic[TEvent]):
+class DomainEventHandler(ABC, Generic[TDomainEvent]):
+    is_async: bool = False
+
     @abstractmethod
-    async def handle(self, event: TEvent) -> None:
+    async def handle(self, event: TDomainEvent) -> None:
         pass
 
 
-class DomainEventHandler(EventHandler[TEvent], ABC):
-    pass
-
-
-class EventBus(ABC, Generic[TEvent]):
+class DomainEventBus(ABC):
     @abstractmethod
-    async def publish(self, event: TEvent) -> None:
+    async def publish(self, event: DomainEvent, only_async: bool = False) -> None:
         pass

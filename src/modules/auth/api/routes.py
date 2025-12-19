@@ -56,13 +56,13 @@ async def login(
             httponly=True,
             secure=True,
             samesite="lax",
-            max_age=result.refresh_token_expires_in,
+            max_age=result.refresh_token_expires_in_seconds,
         )
 
         return LoginResponse(
             access_token=result.access_token,
             refresh_token=result.refresh_token,
-            refresh_token_expires_in=result.refresh_token_expires_in,
+            refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
         )
     except InvalidPasswordException as e:
         raise HTTPException(

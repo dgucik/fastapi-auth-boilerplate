@@ -2,6 +2,7 @@ from asyncio import current_task
 from functools import lru_cache
 from typing import Any
 
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
@@ -13,38 +14,58 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 
-class Settings(BaseSettings):
-    # Database Connection Params
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str
+class MailSettings(BaseModel):
+    USERNAME: str
+    PASSWORD: str
+    FROM: str
+    PORT: int = 587
+    SERVER: str
+    STARTTLS: bool = True
+    SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
 
-    DB_ECHO: bool = False
 
-    # JWT
-    SECRET_KEY: str
-    ALGORITHM: str = "HS256"
-
-    # Token Expiration
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-
-    # Pydantic Configuration
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore", case_sensitive=True
-    )
+class DatabaseSettings(BaseModel):
+    USER: str
+    PASSWORD: str
+    HOST: str
+    PORT: int = 5432
+    NAME: str
 
     @property
     def sqlalchemy_database_url(self) -> str:
         """Constructs the SQLAlchemy URL from individual settings."""
         return (
             f"postgresql+asyncpg://"
-            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
-            f"{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/"
-            f"{self.POSTGRES_DB}"
+            f"{self.USER}:{self.PASSWORD}@"
+            f"{self.HOST}:{self.PORT}/"
+            f"{self.NAME}"
         )
+
+
+class TokenSettings(BaseModel):
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 15
+
+
+class Settings(BaseSettings):
+    APP_BASE_URL: str
+    DB_ECHO: bool = False
+    mail: MailSettings
+    db: DatabaseSettings
+    token: TokenSettings
+
+    # Pydantic Configuration
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+        env_nested_delimiter="__",
+    )
 
 
 @lru_cache
@@ -59,7 +80,7 @@ settings = get_settings()
 connect_args: dict[str, Any] = {}
 
 engine: AsyncEngine = create_async_engine(
-    settings.sqlalchemy_database_url,
+    settings.db.sqlalchemy_database_url,
     echo=settings.DB_ECHO,
     connect_args=connect_args,
 )

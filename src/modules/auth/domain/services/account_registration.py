@@ -14,7 +14,7 @@ class AccountRegistrationService:
     async def register(
         self,
         repo: AccountRepository,
-        id: UUID,
+        account_id: UUID,
         email: Email,
         password: PlainPassword,
     ) -> Account:
@@ -22,5 +22,5 @@ class AccountRegistrationService:
             raise EmailAlreadyExistsException
 
         return Account.create(
-            id=id, email=email, plain_password=password, hasher=self._hasher
+            id=account_id, email=email, plain_password=password, hasher=self._hasher
         )

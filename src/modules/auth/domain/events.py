@@ -9,3 +9,9 @@ from shared.domain.events import DomainEvent
 class AccountRegistered(DomainEvent):
     account_id: UUID
     email: Email
+
+
+@dataclass(frozen=True)
+class VerificationRequested(DomainEvent):
+    account_id: UUID
+    email: Email

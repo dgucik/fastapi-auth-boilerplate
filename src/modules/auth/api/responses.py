@@ -10,4 +10,4 @@ class RegisterResponse(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
-    refresh_token_expires_in: int
+    refresh_token_expires_in_seconds: int

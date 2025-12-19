@@ -5,12 +5,16 @@ from dependency_injector import containers, providers
 
 from auth.application.commands.login import LoginCommand, LoginHandler
 from auth.application.commands.register import RegisterCommand, RegisterHandler
-from auth.application.events.send_welcome_email import SendWelcomeEmail
-from auth.domain.events import AccountRegistered
+from auth.application.events.send_verification_mail import SendVerificationMail
+from auth.domain.events import VerificationRequested
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.infrastructure.database.uow import SqlAlchemyUnitOfWork
-from auth.infrastructure.services import BcryptPasswordHasher, JWTTokenService
+from auth.infrastructure.services import (
+    AioSmtpMailSender,
+    BcryptPasswordHasher,
+    JWTTokenManager,
+)
 from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
 
 
@@ -28,34 +32,28 @@ class AuthContainer(containers.DeclarativeContainer):
         event_bus=domain_event_bus,
     )
 
-    # --- Event Handlers ---
-    send_welcome_email_handler = providers.Factory(SendWelcomeEmail)
-
-    domain_event_bus.add_kwargs(
-        subscribers=providers.Dict(
-            {
-                AccountRegistered: providers.List(send_welcome_email_handler.provider),
-            }
-        )
-    )
-
-    # --- Services ---
+    # --- Infra Services ---
     hasher = providers.Singleton(BcryptPasswordHasher)
 
-    token_service = providers.Singleton(
-        JWTTokenService,
-        secret_key=settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM,
-        access_expire_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
-        refresh_expire_days=settings.REFRESH_TOKEN_EXPIRE_DAYS,
+    token_manager = providers.Singleton(
+        JWTTokenManager,
+        secret_key=settings.token.SECRET_KEY,
+        algorithm=settings.token.ALGORITHM,
+        access_expire_minutes=settings.token.ACCESS_TOKEN_EXPIRE_MINUTES,
+        refresh_expire_days=settings.token.REFRESH_TOKEN_EXPIRE_DAYS,
+        verification_expire_minutes=settings.token.VERIFICATION_TOKEN_EXPIRE_MINUTES,
     )
+
+    mail_sender = providers.Singleton(AioSmtpMailSender, config=settings.mail)
+
+    # --- Domain Services ---
 
     account_registration_service = providers.Factory(
         AccountRegistrationService, hasher=hasher
     )
 
     account_authentication_service = providers.Factory(
-        AccountAuthenticationService, hasher=hasher, token_service=token_service
+        AccountAuthenticationService, hasher=hasher, token_manager=token_manager
     )
 
     # Commands
@@ -72,3 +70,21 @@ class AuthContainer(containers.DeclarativeContainer):
     )
 
     command_bus = providers.Factory(CommandBus, handlers=command_handlers)
+
+    # --- Event Handlers ---
+    send_verification_mail_handler = providers.Factory(
+        SendVerificationMail,
+        token_manager=token_manager,
+        mail_sender=mail_sender,
+        base_url=settings.APP_BASE_URL,
+    )
+
+    domain_event_bus.add_kwargs(
+        subscribers=providers.Dict(
+            {
+                VerificationRequested: providers.List(
+                    send_verification_mail_handler.provider
+                ),
+            }
+        )
+    )

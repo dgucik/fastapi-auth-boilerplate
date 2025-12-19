@@ -24,3 +24,8 @@ class AccountNotVerifiedException(DomainException):
 class InvalidPasswordException(DomainException):
     def __init__(self, message: str = "Invalid email or password.") -> None:
         super().__init__(message)
+
+
+class AccountAlreadyVerifiedException(DomainException):
+    def _init__(self, message: str = "Account already verified.") -> None:
+        super().__init__(message)

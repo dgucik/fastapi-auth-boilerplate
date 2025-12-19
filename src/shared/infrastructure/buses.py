@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Callable
 
 from shared.application.cqrs import (
@@ -9,7 +10,7 @@ from shared.application.cqrs import (
     TMessage,
     TResult,
 )
-from shared.application.event_handling import DomainEventHandler, EventBus
+from shared.application.event_handling import DomainEventBus, DomainEventHandler
 from shared.domain.events import DomainEvent
 from shared.infrastructure.exceptions import BusException
 
@@ -33,7 +34,7 @@ class QueryBus(GenericCqrsBus[Query, Dto]):
     pass
 
 
-class InMemoryDomainEventBus(EventBus[DomainEvent]):
+class InMemoryDomainEventBus(DomainEventBus):
     def __init__(
         self,
         subscribers: dict[
@@ -45,8 +46,12 @@ class InMemoryDomainEventBus(EventBus[DomainEvent]):
             type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
         ] = subscribers or {}
 
-    async def publish(self, event: DomainEvent) -> None:
+    async def publish(self, event: DomainEvent, only_async: bool = False) -> None:
         handler_factories = self._subscribers.get(type(event), [])
         for handler_factory in handler_factories:
             handler = handler_factory()
-            await handler.handle(event)
+
+            if not only_async and not handler.is_async:
+                await handler.handle(event)
+            elif only_async and handler.is_async:
+                asyncio.create_task(handler.handle(event))

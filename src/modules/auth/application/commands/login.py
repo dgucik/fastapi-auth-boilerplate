@@ -16,7 +16,7 @@ class LoginCommand(Command):
 class LoginDto(Dto):
     access_token: str
     refresh_token: str
-    refresh_token_expires_in: int
+    refresh_token_expires_in_seconds: int
 
 
 class LoginHandler(Handler[LoginCommand, LoginDto]):
@@ -38,5 +38,5 @@ class LoginHandler(Handler[LoginCommand, LoginDto]):
         return LoginDto(
             response.access_token,
             response.refresh_token,
-            response.refresh_token_expires_in,
+            response.refresh_token_expires_in_seconds,
         )

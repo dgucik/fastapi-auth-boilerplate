@@ -35,7 +35,7 @@ class RegisterHandler(Handler[RegisterCommand, None]):
         async with self._uow:
             account = await self._service.register(
                 repo=self._uow.accounts,
-                id=command.account_id,
+                account_id=command.account_id,
                 email=email_vo,
                 password=plain_password_vo,
             )
