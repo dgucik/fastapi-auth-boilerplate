@@ -11,3 +11,7 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     refresh_token_expires_in_seconds: int
+
+
+class RequestVerificationTokenResponse(BaseModel):
+    message: str
