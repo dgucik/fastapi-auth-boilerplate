@@ -138,7 +138,6 @@ class AuthContainer(containers.DeclarativeContainer):
     # --- Event Handlers ---
     send_verification_mail_handler = providers.Factory(
         SendVerificationMail,
-        token_manager=token_manager,
         mail_sender=mail_sender,
         base_url=settings.APP_BASE_URL,
     )

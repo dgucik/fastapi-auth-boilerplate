@@ -67,10 +67,19 @@ class TokenManager(ABC):
 
 class MailSender(ABC):
     @abstractmethod
-    async def send_mail(
+    async def send_verification_link_mail(
         self,
-        recipients: list[str],
+        recipient: str,
         subject: str,
         verification_link: str,
+    ) -> None:
+        pass
+
+    @abstractmethod
+    async def send_reset_link_mail(
+        self,
+        recipient: str,
+        subject: str,
+        reset_link: str,
     ) -> None:
         pass

@@ -132,9 +132,9 @@ class AioSmtpMailSender(MailSender):
             autoescape=select_autoescape(["html", "xml"]),
         )
 
-    async def send_mail(
+    async def send_verification_link_mail(
         self,
-        recipients: list[str],
+        recipient: str,
         subject: str,
         verification_link: str,
     ) -> None:
@@ -146,7 +146,7 @@ class AioSmtpMailSender(MailSender):
 
         message = EmailMessage()
         message["From"] = self._config.FROM
-        message["To"] = ", ".join(recipients)
+        message["To"] = recipient
         message["Subject"] = subject
         message.add_alternative(html_content, subtype="html")
 
