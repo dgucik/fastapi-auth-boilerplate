@@ -13,6 +13,10 @@ from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
     RequestVerificationTokenHandler,
 )
+from auth.application.commands.reset_password import (
+    ResetPasswordCommand,
+    ResetPasswordHandler,
+)
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
 from auth.application.events.handlers.send_verification_mail import SendVerificationMail
 from auth.domain.events import (
@@ -104,6 +108,10 @@ class AuthContainer(containers.DeclarativeContainer):
         RequestPasswordResetHandler, uow=uow, token_manager=token_manager
     )
 
+    reset_password_handler = providers.Factory(
+        ResetPasswordHandler, uow=uow, token_manager=token_manager, hasher=hasher
+    )
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
@@ -111,6 +119,7 @@ class AuthContainer(containers.DeclarativeContainer):
             RequestVerificationTokenCommand: request_verification_token_handler,
             VerifyEmailCommand: verify_email_handler,
             RequestPasswordResetCommand: request_password_reset_handler,
+            ResetPasswordCommand: reset_password_handler,
         }
     )
 
