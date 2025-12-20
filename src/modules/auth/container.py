@@ -3,6 +3,10 @@ from typing import Any
 
 from dependency_injector import containers, providers
 
+from auth.application.commands.change_password import (
+    ChangePasswordCommand,
+    ChangePasswordHandler,
+)
 from auth.application.commands.login import LoginCommand, LoginHandler
 from auth.application.commands.register import RegisterCommand, RegisterHandler
 from auth.application.commands.request_password_reset import (
@@ -112,6 +116,10 @@ class AuthContainer(containers.DeclarativeContainer):
         ResetPasswordHandler, uow=uow, token_manager=token_manager, hasher=hasher
     )
 
+    change_password_handler = providers.Factory(
+        ChangePasswordHandler, uow=uow, hasher=hasher
+    )
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
@@ -120,6 +128,7 @@ class AuthContainer(containers.DeclarativeContainer):
             VerifyEmailCommand: verify_email_handler,
             RequestPasswordResetCommand: request_password_reset_handler,
             ResetPasswordCommand: reset_password_handler,
+            ChangePasswordCommand: change_password_handler,
         }
     )
 
