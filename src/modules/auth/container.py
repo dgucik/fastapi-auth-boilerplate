@@ -77,7 +77,10 @@ class AuthContainer(containers.DeclarativeContainer):
 
     # --- Commands & Handlers ---
     register_handler = providers.Factory(
-        RegisterHandler, uow=uow, service=account_registration_service
+        RegisterHandler,
+        uow=uow,
+        service=account_registration_service,
+        token_manager=token_manager,
     )
 
     login_handler = providers.Factory(
@@ -85,7 +88,7 @@ class AuthContainer(containers.DeclarativeContainer):
     )
 
     request_verification_token_handler = providers.Factory(
-        RequestVerificationTokenHandler, uow=uow
+        RequestVerificationTokenHandler, uow=uow, token_manager=token_manager
     )
 
     verify_email_handler = providers.Factory(

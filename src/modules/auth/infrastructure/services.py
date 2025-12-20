@@ -128,13 +128,11 @@ class AioSmtpMailSender(MailSender):
         recipients: list[str],
         subject: str,
         verification_link: str,
-        verification_token_expires_in_minutes: int,
     ) -> None:
         template = self._jinja_env.get_template("verification_mail.html")
 
         html_content = template.render(
             verification_link=verification_link,
-            verification_token_expires_in_minutes=verification_token_expires_in_minutes,
         )
 
         message = EmailMessage()

@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 from auth.application.exceptions import PasswordsDoNotMatchException
 from auth.application.uow import AuthUnitOfWork
+from auth.domain.interfaces import TokenManager
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.domain.value_objects import Email, PlainPassword
 from shared.application.cqrs import Command, Handler
@@ -21,9 +22,11 @@ class RegisterHandler(Handler[RegisterCommand, None]):
         self,
         uow: AuthUnitOfWork,
         service: AccountRegistrationService,
+        token_manager: TokenManager,
     ):
         self._uow = uow
         self._service = service
+        self._token_manager = token_manager
 
     async def handle(self, command: RegisterCommand) -> None:
         if command.password != command.confirm_password:
@@ -41,5 +44,10 @@ class RegisterHandler(Handler[RegisterCommand, None]):
             )
 
             await self._uow.accounts.add(account)
+
+            token = self._token_manager.create_verification_token(
+                subject=str(account.id)
+            )
+            account.request_verification(token)
 
             await self._uow.commit()

@@ -67,6 +67,5 @@ class MailSender(ABC):
         recipients: list[str],
         subject: str,
         verification_link: str,
-        verification_token_expires_in_minutes: int,
     ) -> None:
         pass

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from auth.application.exceptions import AccountDoesNotExistException
 from auth.application.uow import AuthUnitOfWork
+from auth.domain.interfaces import TokenManager
 from auth.domain.value_objects import Email
 from shared.application.cqrs import Command, Handler
 
@@ -12,8 +13,9 @@ class RequestVerificationTokenCommand(Command):
 
 
 class RequestVerificationTokenHandler(Handler[RequestVerificationTokenCommand, None]):
-    def __init__(self, uow: AuthUnitOfWork):
+    def __init__(self, uow: AuthUnitOfWork, token_manager: TokenManager):
         self._uow = uow
+        self._token_manager = token_manager
 
     async def handle(self, command: RequestVerificationTokenCommand) -> None:
         email_vo = Email(value=command.email)
@@ -23,6 +25,10 @@ class RequestVerificationTokenHandler(Handler[RequestVerificationTokenCommand, N
             if account is None:
                 raise AccountDoesNotExistException()
 
-            account.request_verification()
+            token = self._token_manager.create_verification_token(
+                subject=str(account.id)
+            )
+
+            account.request_verification(token)
 
             await self._uow.commit()

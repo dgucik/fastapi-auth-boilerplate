@@ -43,8 +43,6 @@ class Account(AggregateRoot):
             )
         )
 
-        new_account.request_verification()
-
         return new_account
 
     def set_password(
@@ -64,16 +62,20 @@ class Account(AggregateRoot):
             raise AccountAlreadyVerifiedException()
         self.is_verified = True
 
-    def request_verification(self) -> None:
+    def request_verification(self, token: str) -> None:
         if self.is_verified:
             raise AccountAlreadyVerifiedException()
         self.add_event(
-            VerificationRequestedDomainEvent(account_id=self.id, email=self.email)
+            VerificationRequestedDomainEvent(
+                account_id=self.id, email=self.email, token=token
+            )
         )
 
-    def request_password_reset(self) -> None:
+    def request_password_reset(self, token: str) -> None:
         self.add_event(
-            PasswordResetRequestedDomainEvent(account_id=self.id, email=self.email)
+            PasswordResetRequestedDomainEvent(
+                account_id=self.id, email=self.email, token=token
+            )
         )
 
     def reset_password(

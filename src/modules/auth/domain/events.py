@@ -28,17 +28,20 @@ class AccountRegisteredDomainEvent(DomainEvent):
 class VerificationRequestedDomainEvent(DomainEvent):
     account_id: UUID
     email: Email
+    token: str
 
     def to_dict(self) -> dict[str, Any]:
         data = {}
         data["account_id"] = str(self.account_id)
         data["email"] = self.email.value
+        data["token"] = self.token
         return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "VerificationRequestedDomainEvent":
         data["account_id"] = UUID(data["account_id"])
         data["email"] = Email(data["email"])
+        data["token"] = data["token"]
         return cls(**data)
 
 
@@ -46,17 +49,20 @@ class VerificationRequestedDomainEvent(DomainEvent):
 class PasswordResetRequestedDomainEvent(DomainEvent):
     account_id: UUID
     email: Email
+    token: str
 
     def to_dict(self) -> dict[str, Any]:
         data = {}
         data["account_id"] = str(self.account_id)
         data["email"] = self.email.value
+        data["token"] = self.token
         return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "PasswordResetRequestedDomainEvent":
         data["account_id"] = UUID(data["account_id"])
         data["email"] = Email(data["email"])
+        data["token"] = data["token"]
         return cls(**data)
 
 

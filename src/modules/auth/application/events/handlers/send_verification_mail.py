@@ -12,14 +12,10 @@ class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent])
         self._base_url = base_url
 
     async def handle(self, event: VerificationRequestedDomainEvent) -> None:
-        token = self._token_manager.create_verification_token(
-            subject=str(event.account_id)
-        )
-        verification_link = f"{self._base_url}/verify?token={token}"
+        verification_link = f"{self._base_url}/verify?token={event.token}"
         subject = "Please verify your email address"
         await self._mail_sender.send_mail(
             recipients=["danielgucik7@gmail.com"],
             subject=subject,
             verification_link=verification_link,
-            verification_token_expires_in_minutes=self._token_manager.verification_token_expires_in_minutes,
         )
