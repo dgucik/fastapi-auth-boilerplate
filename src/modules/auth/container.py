@@ -121,7 +121,7 @@ class AuthContainer(containers.DeclarativeContainer):
     outbox_processor = providers.Singleton(
         OutboxProcessor,
         session_factory=session_factory,
-        bus=domain_event_bus,
+        event_bus=domain_event_bus,
         registry=domain_event_registry,
         outbox_model=providers.Object(AuthOutboxEvent),
         batch_size=20,

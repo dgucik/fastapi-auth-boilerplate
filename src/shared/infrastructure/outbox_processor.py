@@ -1,14 +1,16 @@
 import asyncio
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from shared.application.event_handling import DomainEventBus, DomainEventRegistry
-from shared.infrastructure.outbox_mixin import OutboxMixin
+from shared.infrastructure.outbox_mixin import OutboxMixin, OutboxStatus
 
 
 class OutboxProcessor:
+    MAX_ATTEMPTS = 5
+
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
@@ -27,7 +29,10 @@ class OutboxProcessor:
         async with self._session_factory() as session:
             stmt = (
                 select(self._outbox_model)
-                .where(self._outbox_model.processed_at.is_(None))
+                .where(
+                    self._outbox_model.status == OutboxStatus.PENDING,
+                    self._outbox_model.scheduled_at <= datetime.now(UTC),
+                )
                 .order_by(self._outbox_model.occurred_at.asc())
                 .limit(self._batch_size)
                 .with_for_update(skip_locked=True)
@@ -38,13 +43,27 @@ class OutboxProcessor:
                 return 0
 
             for record in records:
-                event_cls = self._registry.get_class(record.event_type)
+                try:
+                    event_cls = self._registry.get_class(record.event_type)
+                    event = event_cls.from_dict(record.payload)
 
-                event = event_cls.from_dict(record.payload)
+                    await self._event_bus.publish(event)
 
-                await self._event_bus.publish(event)
+                    record.status = OutboxStatus.PROCESSED
+                    record.processed_at = datetime.now(UTC)
 
-                record.processed_at = datetime.now(UTC)
+                except Exception as e:
+                    record.attempts += 1
+                    record.last_error = str(e)
+
+                    if record.attempts >= self.MAX_ATTEMPTS:
+                        record.status = OutboxStatus.FAILED
+                    else:
+                        delay = (2**record.attempts) * 10
+                        record.scheduled_at = datetime.now(UTC) + timedelta(
+                            seconds=delay
+                        )
+
             await session.commit()
             return len(records)
 
