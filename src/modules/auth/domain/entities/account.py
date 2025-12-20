@@ -3,6 +3,9 @@ from uuid import UUID
 
 from auth.domain.events import (
     AccountRegisteredDomainEvent,
+    PasswordChangedDomainEvent,
+    PasswordResetCompletedDomainEvent,
+    PasswordResetRequestedDomainEvent,
     VerificationRequestedDomainEvent,
 )
 from auth.domain.exceptions import (
@@ -67,6 +70,30 @@ class Account(AggregateRoot):
         self.add_event(
             VerificationRequestedDomainEvent(account_id=self.id, email=self.email)
         )
+
+    def request_password_reset(self) -> None:
+        self.add_event(
+            PasswordResetRequestedDomainEvent(account_id=self.id, email=self.email)
+        )
+
+    def reset_password(
+        self, new_password: PlainPassword, hasher: PasswordHasher
+    ) -> None:
+        self.set_password(new_password, hasher)
+        self.add_event(PasswordResetCompletedDomainEvent(account_id=self.id))
+
+    def change_password(
+        self,
+        old_password: PlainPassword,
+        new_password: PlainPassword,
+        hasher: PasswordHasher,
+    ) -> None:
+        if not hasher.verify(old_password.value, self._password_hash):
+            raise InvalidPasswordException()
+
+        self.set_password(new_password, hasher)
+
+        self.add_event(PasswordChangedDomainEvent(account_id=self.id))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Account):

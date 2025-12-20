@@ -40,3 +40,51 @@ class VerificationRequestedDomainEvent(DomainEvent):
         data["account_id"] = UUID(data["account_id"])
         data["email"] = Email(data["email"])
         return cls(**data)
+
+
+@dataclass(frozen=True)
+class PasswordResetRequestedDomainEvent(DomainEvent):
+    account_id: UUID
+    email: Email
+
+    def to_dict(self) -> dict[str, Any]:
+        data = {}
+        data["account_id"] = str(self.account_id)
+        data["email"] = self.email.value
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PasswordResetRequestedDomainEvent":
+        data["account_id"] = UUID(data["account_id"])
+        data["email"] = Email(data["email"])
+        return cls(**data)
+
+
+@dataclass(frozen=True)
+class PasswordResetCompletedDomainEvent(DomainEvent):
+    account_id: UUID
+
+    def to_dict(self) -> dict[str, Any]:
+        data = {}
+        data["account_id"] = str(self.account_id)
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PasswordResetCompletedDomainEvent":
+        data["account_id"] = UUID(data["account_id"])
+        return cls(**data)
+
+
+@dataclass(frozen=True)
+class PasswordChangedDomainEvent(DomainEvent):
+    account_id: UUID
+
+    def to_dict(self) -> dict[str, Any]:
+        data = {}
+        data["account_id"] = str(self.account_id)
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "PasswordChangedDomainEvent":
+        data["account_id"] = UUID(data["account_id"])
+        return cls(**data)
