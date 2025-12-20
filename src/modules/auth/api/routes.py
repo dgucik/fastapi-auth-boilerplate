@@ -19,9 +19,7 @@ from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
 )
 from auth.container import AuthContainer
-from auth.domain.exceptions import AccountNotVerifiedException, InvalidPasswordException
-from shared.application.exceptions import ApplicationException
-from shared.domain.exceptions import DomainException
+from auth.domain.exceptions import InvalidPasswordException
 from shared.infrastructure.buses import CommandBus
 
 router = APIRouter(tags=["Auth"])
@@ -41,13 +39,8 @@ async def register(
         confirm_password=request.confirm_password,
     )
 
-    try:
-        await command_bus.dispatch(cmd)
-        return RegisterResponse(account_id=cmd.account_id)
-    except (DomainException, ApplicationException) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        ) from e
+    await command_bus.dispatch(cmd)
+    return RegisterResponse(account_id=cmd.account_id)
 
 
 @router.post("/jwt/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
@@ -80,13 +73,6 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
         ) from e
 
-    except AccountNotVerifiedException as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from e
-    except (DomainException, ApplicationException) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        ) from e
-
 
 @router.post(
     "/request-verify-token",
@@ -99,15 +85,10 @@ async def request_verification_token(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> RequestVerificationTokenResponse:
-    try:
-        command = RequestVerificationTokenCommand(email=request.email)
+    command = RequestVerificationTokenCommand(email=request.email)
 
-        await command_bus.dispatch(command)
+    await command_bus.dispatch(command)
 
-        return RequestVerificationTokenResponse(
-            message="Verification email sent successfully."
-        )
-    except (DomainException, ApplicationException) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        ) from e
+    return RequestVerificationTokenResponse(
+        message="Verification email sent successfully."
+    )
