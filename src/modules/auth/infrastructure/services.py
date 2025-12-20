@@ -132,17 +132,12 @@ class AioSmtpMailSender(MailSender):
             autoescape=select_autoescape(["html", "xml"]),
         )
 
-    async def send_verification_link_mail(
-        self,
-        recipient: str,
-        subject: str,
-        verification_link: str,
+    async def send(
+        self, recipient: str, subject: str, template_name: str, context: dict[str, Any]
     ) -> None:
-        template = self._jinja_env.get_template("verification_mail.html")
+        template = self._jinja_env.get_template(template_name)
 
-        html_content = template.render(
-            verification_link=verification_link,
-        )
+        html_content = template.render(**context)
 
         message = EmailMessage()
         message["From"] = self._config.FROM

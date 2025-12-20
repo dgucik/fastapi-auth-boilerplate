@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Any
 
 
 class PasswordHasher(ABC):
@@ -67,19 +68,7 @@ class TokenManager(ABC):
 
 class MailSender(ABC):
     @abstractmethod
-    async def send_verification_link_mail(
-        self,
-        recipient: str,
-        subject: str,
-        verification_link: str,
-    ) -> None:
-        pass
-
-    @abstractmethod
-    async def send_reset_link_mail(
-        self,
-        recipient: str,
-        subject: str,
-        reset_link: str,
+    async def send(
+        self, recipient: str, subject: str, template_name: str, context: dict[str, Any]
     ) -> None:
         pass

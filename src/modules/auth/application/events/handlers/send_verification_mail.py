@@ -9,10 +9,13 @@ class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent])
         self._base_url = base_url
 
     async def handle(self, event: VerificationRequestedDomainEvent) -> None:
-        verification_link = f"{self._base_url}/verify?token={event.token}"
         subject = "Please verify your email address"
-        await self._mail_sender.send_verification_link_mail(
+        template_name = "verification_mail.html"
+        context = {"verification_link": f"{self._base_url}/verify?token={event.token}"}
+
+        await self._mail_sender.send(
             recipient=event.email.value,
             subject=subject,
-            verification_link=verification_link,
+            template_name=template_name,
+            context=context,
         )
