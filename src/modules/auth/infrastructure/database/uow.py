@@ -4,7 +4,7 @@ from auth.application.uow import AuthUnitOfWork
 from auth.domain.repositories import AccountRepository
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.repositories import SqlAlchemyAccountRepository
-from shared.application.event_handling import EventBus, EventRegistry
+from shared.application.event_handling import DomainEventBus, DomainEventRegistry
 from shared.infrastructure.base_uow import BaseSqlAlchemyUnitOfWork
 
 
@@ -12,8 +12,8 @@ class SqlAlchemyUnitOfWork(BaseSqlAlchemyUnitOfWork, AuthUnitOfWork):
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
-        event_bus: EventBus,
-        event_registry: EventRegistry,
+        event_bus: DomainEventBus,
+        event_registry: DomainEventRegistry,
     ):
         super().__init__(session_factory, event_bus, event_registry)
         self.accounts: AccountRepository

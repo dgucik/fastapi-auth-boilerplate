@@ -1,6 +1,6 @@
 from contextvars import ContextVar
 
-from shared.domain.events import Event
+from shared.domain.events import DomainEvent
 from shared.domain.primitives import AggregateRoot
 
 
@@ -16,7 +16,7 @@ class AggregateRegistry:
         cls._aggregates.get().add(aggregate)
 
     @classmethod
-    def pull_events(cls) -> list[Event]:
+    def pull_events(cls) -> list[DomainEvent]:
         all_events = []
         for aggregate in cls._aggregates.get():
             all_events.extend(aggregate.pull_events())

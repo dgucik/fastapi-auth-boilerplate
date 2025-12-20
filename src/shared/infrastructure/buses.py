@@ -9,8 +9,8 @@ from shared.application.cqrs import (
     TMessage,
     TResult,
 )
-from shared.application.event_handling import EventBus, EventHandler
-from shared.domain.events import Event
+from shared.application.event_handling import DomainEventBus, DomainEventHandler
+from shared.domain.events import DomainEvent
 from shared.infrastructure.exceptions import BusException
 
 
@@ -33,16 +33,18 @@ class QueryBus(GenericCqrsBus[Query, Dto]):
     pass
 
 
-class InMemoryEventBus(EventBus):
+class InMemoryDomainEventBus(DomainEventBus):
     def __init__(
         self,
-        subscribers: dict[type[Event], list[Callable[[], EventHandler[Event]]]],
+        subscribers: dict[
+            type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
+        ],
     ):
         self._subscribers: dict[
-            type[Event], list[Callable[[], EventHandler[Event]]]
+            type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
         ] = subscribers or {}
 
-    async def publish(self, event: Event) -> None:
+    async def publish(self, event: DomainEvent) -> None:
         handler_factories = self._subscribers.get(type(event), [])
         for handler_factory in handler_factories:
             handler = handler_factory()

@@ -2,7 +2,7 @@ import uuid
 from abc import ABC
 from dataclasses import dataclass, field
 
-from shared.domain.events import Event
+from shared.domain.events import DomainEvent
 
 
 @dataclass(frozen=True)
@@ -25,12 +25,12 @@ class Entity(ABC):
 
 @dataclass(eq=False)
 class AggregateRoot(Entity):
-    _events: list[Event] = field(default_factory=list, init=False, repr=False)
+    _events: list[DomainEvent] = field(default_factory=list, init=False, repr=False)
 
-    def add_event(self, event: Event) -> None:
+    def add_event(self, event: DomainEvent) -> None:
         self._events.append(event)
 
-    def pull_events(self) -> list[Event]:
+    def pull_events(self) -> list[DomainEvent]:
         events = self._events[:]
         self._events.clear()
         return events

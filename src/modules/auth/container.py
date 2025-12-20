@@ -9,8 +9,11 @@ from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
     RequestVerificationTokenHandler,
 )
-from auth.application.events.send_verification_mail import SendVerificationMail
-from auth.domain.events import AccountRegistered, VerificationRequested
+from auth.application.events.handlers.send_verification_mail import SendVerificationMail
+from auth.domain.events import (
+    AccountRegisteredDomainEvent,
+    VerificationRequestedDomainEvent,
+)
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.infrastructure.database.models import AuthOutboxEvent
@@ -20,8 +23,8 @@ from auth.infrastructure.services import (
     BcryptPasswordHasher,
     JWTTokenManager,
 )
-from shared.infrastructure.buses import CommandBus, InMemoryEventBus
-from shared.infrastructure.event_registry import EventRegistryImpl
+from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
+from shared.infrastructure.event_registry import DomainEventRegistryImpl
 from shared.infrastructure.outbox_processor import OutboxProcessor
 
 
@@ -30,13 +33,13 @@ class AuthContainer(containers.DeclarativeContainer):
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
     # --- Event Bus & Event Registry ---
-    in_mem_event_bus = providers.Singleton(InMemoryEventBus)
+    domain_event_bus = providers.Singleton(InMemoryDomainEventBus)
 
-    event_registry = providers.Singleton(
-        EventRegistryImpl,
+    domain_event_registry = providers.Singleton(
+        DomainEventRegistryImpl,
         events=[
-            VerificationRequested,
-            AccountRegistered,
+            VerificationRequestedDomainEvent,
+            AccountRegisteredDomainEvent,
         ],
     )
 
@@ -44,8 +47,8 @@ class AuthContainer(containers.DeclarativeContainer):
     uow = providers.Factory(
         SqlAlchemyUnitOfWork,
         session_factory=session_factory,
-        event_bus=in_mem_event_bus,
-        event_registry=event_registry,
+        event_bus=domain_event_bus,
+        event_registry=domain_event_registry,
     )
 
     # --- Infra Services ---
@@ -104,10 +107,10 @@ class AuthContainer(containers.DeclarativeContainer):
     )
 
     # --- Event Bus Subscribers Registration ---
-    in_mem_event_bus.add_kwargs(
+    domain_event_bus.add_kwargs(
         subscribers=providers.Dict(
             {
-                VerificationRequested: providers.List(
+                VerificationRequestedDomainEvent: providers.List(
                     send_verification_mail_handler.provider
                 ),
             }
@@ -118,8 +121,8 @@ class AuthContainer(containers.DeclarativeContainer):
     outbox_processor = providers.Singleton(
         OutboxProcessor,
         session_factory=session_factory,
-        bus=in_mem_event_bus,
-        registry=event_registry,
+        bus=domain_event_bus,
+        registry=domain_event_registry,
         outbox_model=providers.Object(AuthOutboxEvent),
         batch_size=20,
     )

@@ -1,9 +1,9 @@
-from auth.domain.events import VerificationRequested
+from auth.domain.events import VerificationRequestedDomainEvent
 from auth.domain.interfaces import MailSender, TokenManager
-from shared.application.event_handling import EventHandler
+from shared.application.event_handling import DomainEventHandler
 
 
-class SendVerificationMail(EventHandler[VerificationRequested]):
+class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent]):
     def __init__(
         self, token_manager: TokenManager, mail_sender: MailSender, base_url: str
     ) -> None:
@@ -11,7 +11,7 @@ class SendVerificationMail(EventHandler[VerificationRequested]):
         self._mail_sender = mail_sender
         self._base_url = base_url
 
-    async def handle(self, event: VerificationRequested) -> None:
+    async def handle(self, event: VerificationRequestedDomainEvent) -> None:
         token = self._token_manager.create_verification_token(
             subject=str(event.account_id)
         )

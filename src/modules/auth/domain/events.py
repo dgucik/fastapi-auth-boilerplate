@@ -3,11 +3,11 @@ from typing import Any
 from uuid import UUID
 
 from auth.domain.value_objects import Email
-from shared.domain.events import Event
+from shared.domain.events import DomainEvent
 
 
 @dataclass(frozen=True)
-class AccountRegistered(Event):
+class AccountRegisteredDomainEvent(DomainEvent):
     account_id: UUID
     email: Email
 
@@ -18,14 +18,14 @@ class AccountRegistered(Event):
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "AccountRegistered":
+    def from_dict(cls, data: dict[str, Any]) -> "AccountRegisteredDomainEvent":
         data["account_id"] = UUID(data["account_id"])
         data["email"] = Email(data["email"])
         return cls(**data)
 
 
 @dataclass(frozen=True)
-class VerificationRequested(Event):
+class VerificationRequestedDomainEvent(DomainEvent):
     account_id: UUID
     email: Email
 
@@ -36,7 +36,7 @@ class VerificationRequested(Event):
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "VerificationRequested":
+    def from_dict(cls, data: dict[str, Any]) -> "VerificationRequestedDomainEvent":
         data["account_id"] = UUID(data["account_id"])
         data["email"] = Email(data["email"])
         return cls(**data)

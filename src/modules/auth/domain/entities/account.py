@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from auth.domain.events import AccountRegistered, VerificationRequested
+from auth.domain.events import (
+    AccountRegisteredDomainEvent,
+    VerificationRequestedDomainEvent,
+)
 from auth.domain.exceptions import (
     AccountAlreadyVerifiedException,
     AccountNotVerifiedException,
@@ -32,7 +35,9 @@ class Account(AggregateRoot):
         new_account.set_password(plain_password, hasher)
 
         new_account.add_event(
-            AccountRegistered(account_id=new_account.id, email=new_account.email)
+            AccountRegisteredDomainEvent(
+                account_id=new_account.id, email=new_account.email
+            )
         )
 
         new_account.request_verification()
@@ -59,7 +64,9 @@ class Account(AggregateRoot):
     def request_verification(self) -> None:
         if self.is_verified:
             raise AccountAlreadyVerifiedException()
-        self.add_event(VerificationRequested(account_id=self.id, email=self.email))
+        self.add_event(
+            VerificationRequestedDomainEvent(account_id=self.id, email=self.email)
+        )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Account):

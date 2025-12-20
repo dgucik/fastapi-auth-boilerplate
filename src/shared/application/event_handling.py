@@ -1,32 +1,32 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from shared.domain.events import Event
+from shared.domain.events import DomainEvent
 
-TEvent = TypeVar("TEvent", bound=Event)
+TDomainEvent = TypeVar("TDomainEvent", bound=DomainEvent)
 
 
-class EventHandler(ABC, Generic[TEvent]):
+class DomainEventHandler(ABC, Generic[TDomainEvent]):
     @abstractmethod
-    async def handle(self, event: TEvent) -> None:
+    async def handle(self, event: TDomainEvent) -> None:
         pass
 
 
-class EventBus(ABC):
+class DomainEventBus(ABC):
     @abstractmethod
-    async def publish(self, event: Event) -> None:
+    async def publish(self, event: DomainEvent) -> None:
         pass
 
 
-class EventRegistry(ABC):
+class DomainEventRegistry(ABC):
     @abstractmethod
-    def register(self, event_class: type[Event]) -> None:
+    def register(self, event_class: type[DomainEvent]) -> None:
         pass
 
     @abstractmethod
-    def get_class(self, event_name: str) -> type[Event]:
+    def get_class(self, event_name: str) -> type[DomainEvent]:
         pass
 
     @abstractmethod
-    def get_name(self, event_cls: type[Event]) -> str:
+    def get_name(self, event_cls: type[DomainEvent]) -> str:
         pass
