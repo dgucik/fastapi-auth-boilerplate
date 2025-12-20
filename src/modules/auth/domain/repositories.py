@@ -11,6 +11,10 @@ class AccountRepository(ABC):
         pass
 
     @abstractmethod
+    async def update(self, entity: Account) -> None:
+        pass
+
+    @abstractmethod
     async def get_by_email(self, email: Email) -> Account | None:
         pass
 

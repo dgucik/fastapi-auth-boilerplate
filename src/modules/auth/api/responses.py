@@ -15,3 +15,7 @@ class LoginResponse(BaseModel):
 
 class RequestVerificationTokenResponse(BaseModel):
     message: str
+
+
+class VerifyEmailResponse(BaseModel):
+    message: str

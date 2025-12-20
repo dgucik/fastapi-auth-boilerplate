@@ -18,7 +18,7 @@ class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent])
         verification_link = f"{self._base_url}/verify?token={token}"
         subject = "Please verify your email address"
         await self._mail_sender.send_mail(
-            recipients=[event.email.value],
+            recipients=["danielgucik7@gmail.com"],
             subject=subject,
             verification_link=verification_link,
             verification_token_expires_in_minutes=self._token_manager.verification_token_expires_in_minutes,

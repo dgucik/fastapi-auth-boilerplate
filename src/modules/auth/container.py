@@ -9,6 +9,7 @@ from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
     RequestVerificationTokenHandler,
 )
+from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
 from auth.application.events.handlers.send_verification_mail import SendVerificationMail
 from auth.domain.events import (
     AccountRegisteredDomainEvent,
@@ -87,11 +88,16 @@ class AuthContainer(containers.DeclarativeContainer):
         RequestVerificationTokenHandler, uow=uow
     )
 
+    verify_email_handler = providers.Factory(
+        VerifyEmailHandler, uow=uow, token_manager=token_manager
+    )
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
             LoginCommand: login_handler,
             RequestVerificationTokenCommand: request_verification_token_handler,
+            VerifyEmailCommand: verify_email_handler,
         }
     )
 

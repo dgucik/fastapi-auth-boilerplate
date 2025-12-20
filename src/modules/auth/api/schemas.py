@@ -18,3 +18,7 @@ class LoginRequest(BaseModel):
 
 class RequestVerificationTokenRequest(BaseModel):
     email: EmailStr
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str

@@ -7,17 +7,20 @@ from auth.api.responses import (
     LoginResponse,
     RegisterResponse,
     RequestVerificationTokenResponse,
+    VerifyEmailResponse,
 )
 from auth.api.schemas import (
     LoginRequest,
     RegisterRequest,
     RequestVerificationTokenRequest,
+    VerifyEmailRequest,
 )
 from auth.application.commands.login import LoginCommand, LoginDto
 from auth.application.commands.register import RegisterCommand
 from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
 )
+from auth.application.commands.verify import VerifyEmailCommand
 from auth.container import AuthContainer
 from auth.domain.exceptions import InvalidPasswordException
 from shared.infrastructure.buses import CommandBus
@@ -92,3 +95,21 @@ async def request_verification_token(
     return RequestVerificationTokenResponse(
         message="Verification email sent successfully."
     )
+
+
+@router.post(
+    "/verify",
+    response_model=VerifyEmailResponse,
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def verify_email(
+    request: VerifyEmailRequest,
+    response: Response,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+) -> VerifyEmailResponse:
+    command = VerifyEmailCommand(token=request.token)
+
+    await command_bus.dispatch(command)
+
+    return VerifyEmailResponse(message="Email verified successfully.")

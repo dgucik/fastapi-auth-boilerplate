@@ -28,6 +28,11 @@ class SqlAlchemyAccountRepository(AccountRepository, BaseRepository[Account]):
         account_model = self._to_model(account)
         self._session.add(account_model)
 
+    async def update(self, account: Account) -> None:
+        self._register(account)
+        account_model = self._to_model(account)
+        await self._session.merge(account_model)
+
     def _to_domain(self, account_model: AccountModel) -> Account:
         account = Account(
             id=account_model.id,
