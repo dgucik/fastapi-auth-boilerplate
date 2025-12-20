@@ -19,6 +19,7 @@ class TokenScope(StrEnum):
     ACCESS = "access"
     REFRESH = "refresh"
     VERIFICATION = "verification"
+    PASSWORD_RESET = "password_reset"  # noqa: S105
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,10 @@ class TokenManager(ABC):
 
     @abstractmethod
     def create_verification_token(self, subject: str) -> str:
+        pass
+
+    @abstractmethod
+    def create_password_reset_token(self, subject: str) -> str:
         pass
 
     @abstractmethod

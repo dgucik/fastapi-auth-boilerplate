@@ -49,6 +49,7 @@ class TokenSettings(BaseModel):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 15
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 15
 
 
 class Settings(BaseSettings):

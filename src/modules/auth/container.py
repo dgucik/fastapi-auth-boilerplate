@@ -5,6 +5,10 @@ from dependency_injector import containers, providers
 
 from auth.application.commands.login import LoginCommand, LoginHandler
 from auth.application.commands.register import RegisterCommand, RegisterHandler
+from auth.application.commands.request_password_reset import (
+    RequestPasswordResetCommand,
+    RequestPasswordResetHandler,
+)
 from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
     RequestVerificationTokenHandler,
@@ -62,6 +66,7 @@ class AuthContainer(containers.DeclarativeContainer):
         access_expire_minutes=settings.token.ACCESS_TOKEN_EXPIRE_MINUTES,
         refresh_expire_days=settings.token.REFRESH_TOKEN_EXPIRE_DAYS,
         verification_expire_minutes=settings.token.VERIFICATION_TOKEN_EXPIRE_MINUTES,
+        password_reset_expire_minutes=settings.token.PASSWORD_RESET_EXPIRE_MINUTES,
     )
 
     mail_sender = providers.Singleton(AioSmtpMailSender, config=settings.mail)
@@ -95,12 +100,17 @@ class AuthContainer(containers.DeclarativeContainer):
         VerifyEmailHandler, uow=uow, token_manager=token_manager
     )
 
+    request_password_reset_handler = providers.Factory(
+        RequestPasswordResetHandler, uow=uow, token_manager=token_manager
+    )
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
             LoginCommand: login_handler,
             RequestVerificationTokenCommand: request_verification_token_handler,
             VerifyEmailCommand: verify_email_handler,
+            RequestPasswordResetCommand: request_password_reset_handler,
         }
     )
 

@@ -41,12 +41,14 @@ class JWTTokenManager(TokenManager):
         access_expire_minutes: int,
         refresh_expire_days: int,
         verification_expire_minutes: int,
+        password_reset_expire_minutes: int,
     ):
         self.secret_key = secret_key
         self.algorithm = algorithm
         self.access_expire_minutes = access_expire_minutes
         self.refresh_expire_days = refresh_expire_days
         self.verification_expire_minutes = verification_expire_minutes
+        self.password_reset_expire_minutes = password_reset_expire_minutes
 
     def issue_auth_tokens(self, subject: str) -> AuthenticationResult:
         access_token = self.create_access_token(subject)
@@ -76,6 +78,13 @@ class JWTTokenManager(TokenManager):
             subject=subject,
             expires_delta=timedelta(minutes=self.verification_expire_minutes),
             token_type=TokenScope.VERIFICATION,
+        )
+
+    def create_password_reset_token(self, subject: str) -> str:
+        return self._create_token(
+            subject=subject,
+            expires_delta=timedelta(minutes=self.password_reset_expire_minutes),
+            token_type=TokenScope.PASSWORD_RESET,
         )
 
     def _create_token(
