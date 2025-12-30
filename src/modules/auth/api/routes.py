@@ -94,6 +94,52 @@ async def login(
 
 
 @router.post(
+    "/refresh-token",
+    response_model=RefreshTokenRequest,
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def refresh_token(
+    request: RefreshTokenRequest,
+    response: Response,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+) -> RefreshTokenResponse:
+    cmd = RefreshTokenCommand(refresh_token=request.refresh_token)
+    result: RefreshTokenDto = await command_bus.dispatch(cmd)  # type: ignore
+    response.set_cookie(
+        key="refresh_token",
+        value=result.refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=result.refresh_token_expires_in_seconds,
+    )
+
+    return RefreshTokenResponse(
+        access_token=result.access_token,
+        refresh_token=result.refresh_token,
+        refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
+    )
+
+
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def logout(
+    response: Response, current_account: Account = Depends(get_current_account)
+) -> LogoutResponse:
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    return LogoutResponse(message="Logged out successfully.")
+
+
+@router.post(
     "/request-verify-token",
     response_model=RequestVerificationTokenResponse,
     status_code=status.HTTP_200_OK,
@@ -195,49 +241,3 @@ async def change_password(
     return ChangePasswordResponse(
         message="Your password has been changed successfully."
     )
-
-
-@router.post(
-    "/refresh-token",
-    response_model=RefreshTokenRequest,
-    status_code=status.HTTP_200_OK,
-)
-@inject
-async def refresh_token(
-    request: RefreshTokenRequest,
-    response: Response,
-    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
-) -> RefreshTokenResponse:
-    cmd = RefreshTokenCommand(refresh_token=request.refresh_token)
-    result: RefreshTokenDto = await command_bus.dispatch(cmd)  # type: ignore
-    response.set_cookie(
-        key="refresh_token",
-        value=result.refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=result.refresh_token_expires_in_seconds,
-    )
-
-    return RefreshTokenResponse(
-        access_token=result.access_token,
-        refresh_token=result.refresh_token,
-        refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
-    )
-
-
-@router.post(
-    "/logout",
-    response_model=LogoutResponse,
-    status_code=status.HTTP_200_OK,
-)
-async def logout(
-    response: Response, current_account: Account = Depends(get_current_account)
-) -> LogoutResponse:
-    response.delete_cookie(
-        key="refresh_token",
-        httponly=True,
-        secure=True,
-        samesite="lax",
-    )
-    return LogoutResponse(message="Logged out successfully.")
