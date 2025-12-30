@@ -52,7 +52,7 @@ class TokenManager(ABC):
         pass
 
     @abstractmethod
-    def decode_token(self, token: str, token_type: TokenScope) -> str:
+    def decode_token(self, token: str, expected_type: TokenScope) -> str:
         pass
 
     @property

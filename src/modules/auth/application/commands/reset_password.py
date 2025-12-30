@@ -15,7 +15,7 @@ from shared.application.cqrs import Command, Handler
 class ResetPasswordCommand(Command):
     token: str
     new_password: str
-    confirm_password: str
+    confirm_new_password: str
 
 
 class ResetPasswordHandler(Handler[ResetPasswordCommand, None]):
@@ -27,7 +27,7 @@ class ResetPasswordHandler(Handler[ResetPasswordCommand, None]):
         self._hasher = hasher
 
     async def handle(self, command: ResetPasswordCommand) -> None:
-        if command.new_password != command.confirm_password:
+        if command.new_password != command.confirm_new_password:
             raise PasswordsDoNotMatchException
 
         new_password_vo = PlainPassword(command.new_password)

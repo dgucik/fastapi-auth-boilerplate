@@ -22,9 +22,13 @@ from auth.application.commands.reset_password import (
     ResetPasswordHandler,
 )
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
+from auth.application.events.handlers.send_password_reset_mail import (
+    SendPasswordResetMail,
+)
 from auth.application.events.handlers.send_verification_mail import SendVerificationMail
 from auth.domain.events import (
     AccountRegisteredDomainEvent,
+    PasswordResetRequestedDomainEvent,
     VerificationRequestedDomainEvent,
 )
 from auth.domain.services.account_authentication import AccountAuthenticationService
@@ -53,6 +57,7 @@ class AuthContainer(containers.DeclarativeContainer):
         events=[
             VerificationRequestedDomainEvent,
             AccountRegisteredDomainEvent,
+            PasswordResetRequestedDomainEvent,
         ],
     )
 
@@ -142,12 +147,21 @@ class AuthContainer(containers.DeclarativeContainer):
         base_url=settings.APP_BASE_URL,
     )
 
+    send_password_reset_handler = providers.Factory(
+        SendPasswordResetMail,
+        mail_sender=mail_sender,
+        base_url=settings.APP_BASE_URL,
+    )
+
     # --- Event Bus Subscribers Registration ---
     domain_event_bus.add_kwargs(
         subscribers=providers.Dict(
             {
                 VerificationRequestedDomainEvent: providers.List(
                     send_verification_mail_handler.provider
+                ),
+                PasswordResetRequestedDomainEvent: providers.List(
+                    send_password_reset_handler.provider
                 ),
             }
         )

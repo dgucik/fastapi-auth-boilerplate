@@ -10,7 +10,7 @@ class SendPasswordResetMail(DomainEventHandler[PasswordResetRequestedDomainEvent
 
     async def handle(self, event: PasswordResetRequestedDomainEvent) -> None:
         subject = "Reset your password"
-        template_name = ""
+        template_name = "reset_password_mail.html"
         context = {"reset_link": f"{self._base_url}/reset-password?token={event.token}"}
 
         await self._mail_sender.send(

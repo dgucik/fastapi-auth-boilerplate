@@ -19,3 +19,15 @@ class RequestVerificationTokenResponse(BaseModel):
 
 class VerifyEmailResponse(BaseModel):
     message: str
+
+
+class RequestPasswordResetResponse(BaseModel):
+    message: str
+
+
+class ResetPasswordResponse(BaseModel):
+    message: str
+
+
+class ChangePasswordResponse(BaseModel):
+    message: str

@@ -22,3 +22,19 @@ class RequestVerificationTokenRequest(BaseModel):
 
 class VerifyEmailRequest(BaseModel):
     token: str
+
+
+class RequestPasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+    confirm_new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+    confirm_new_password: str

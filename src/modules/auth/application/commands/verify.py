@@ -19,7 +19,7 @@ class VerifyEmailHandler(Handler[VerifyEmailCommand, None]):
 
     async def handle(self, command: VerifyEmailCommand) -> None:
         account_id_str = self._token_manager.decode_token(
-            command.token, token_type=TokenScope.VERIFICATION
+            command.token, expected_type=TokenScope.VERIFICATION
         )
         account_id = UUID(account_id_str)
 

@@ -3,25 +3,37 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from auth.api.dependencies import get_current_account
 from auth.api.responses import (
+    ChangePasswordResponse,
     LoginResponse,
     RegisterResponse,
+    RequestPasswordResetResponse,
     RequestVerificationTokenResponse,
+    ResetPasswordResponse,
     VerifyEmailResponse,
 )
 from auth.api.schemas import (
+    ChangePasswordRequest,
     LoginRequest,
     RegisterRequest,
+    RequestPasswordResetRequest,
     RequestVerificationTokenRequest,
+    ResetPasswordRequest,
     VerifyEmailRequest,
 )
+from auth.application.commands.change_password import ChangePasswordCommand
 from auth.application.commands.login import LoginCommand, LoginDto
 from auth.application.commands.register import RegisterCommand
+from auth.application.commands.request_password_reset import RequestPasswordResetCommand
 from auth.application.commands.request_verification_token import (
     RequestVerificationTokenCommand,
 )
+from auth.application.commands.reset_password import ResetPasswordCommand
 from auth.application.commands.verify import VerifyEmailCommand
+from auth.application.exceptions import AccountDoesNotExistException
 from auth.container import AuthContainer
+from auth.domain.entities.account import Account
 from auth.domain.exceptions import InvalidPasswordException
 from shared.infrastructure.buses import CommandBus
 
@@ -46,7 +58,7 @@ async def register(
     return RegisterResponse(account_id=cmd.account_id)
 
 
-@router.post("/jwt/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
 @inject
 async def login(
     request: LoginRequest,
@@ -88,9 +100,9 @@ async def request_verification_token(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> RequestVerificationTokenResponse:
-    command = RequestVerificationTokenCommand(email=request.email)
+    cmd = RequestVerificationTokenCommand(email=request.email)
 
-    await command_bus.dispatch(command)
+    await command_bus.dispatch(cmd)
 
     return RequestVerificationTokenResponse(
         message="Verification email sent successfully."
@@ -108,8 +120,74 @@ async def verify_email(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> VerifyEmailResponse:
-    command = VerifyEmailCommand(token=request.token)
+    cmd = VerifyEmailCommand(token=request.token)
 
-    await command_bus.dispatch(command)
+    await command_bus.dispatch(cmd)
 
     return VerifyEmailResponse(message="Email verified successfully.")
+
+
+@router.post(
+    "/request-password-reset",
+    response_model=RequestPasswordResetResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+@inject
+async def request_password_reset(
+    request: RequestPasswordResetRequest,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+) -> RequestPasswordResetResponse:
+    cmd = RequestPasswordResetCommand(email=request.email)
+
+    try:
+        await command_bus.dispatch(cmd)
+    except AccountDoesNotExistException:
+        pass
+
+    return RequestPasswordResetResponse(message="A password reset link has been sent.")
+
+
+@router.post(
+    "/reset-password",
+    response_model=ResetPasswordResponse,
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def reset_password(
+    request: ResetPasswordRequest,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+) -> ResetPasswordResponse:
+    cmd = ResetPasswordCommand(
+        token=request.token,
+        new_password=request.new_password,
+        confirm_new_password=request.confirm_new_password,
+    )
+
+    await command_bus.dispatch(cmd)
+
+    return ResetPasswordResponse(message="Password has been successfully reset.")
+
+
+@router.post(
+    "/change-password",
+    response_model=ChangePasswordResponse,
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def change_password(
+    request: ChangePasswordRequest,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+    current_account: Account = Depends(get_current_account),
+) -> ChangePasswordResponse:
+    cmd = ChangePasswordCommand(
+        account_id=current_account.id,
+        old_password=request.old_password,
+        new_password=request.new_password,
+        confirm_new_password=request.confirm_new_password,
+    )
+
+    await command_bus.dispatch(cmd)
+
+    return ChangePasswordResponse(
+        message="Your password has been changed successfully."
+    )
