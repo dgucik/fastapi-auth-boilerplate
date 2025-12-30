@@ -95,7 +95,7 @@ async def login(
 
 @router.post(
     "/refresh-token",
-    response_model=RefreshTokenRequest,
+    response_model=RefreshTokenResponse,
     status_code=status.HTTP_200_OK,
 )
 @inject
