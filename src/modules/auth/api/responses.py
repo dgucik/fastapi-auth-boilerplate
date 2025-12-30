@@ -37,3 +37,7 @@ class RefreshTokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     refresh_token_expires_in_seconds: int
+
+
+class LogoutResponse(BaseModel):
+    message: str

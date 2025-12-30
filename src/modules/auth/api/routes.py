@@ -7,6 +7,7 @@ from auth.api.dependencies import get_current_account
 from auth.api.responses import (
     ChangePasswordResponse,
     LoginResponse,
+    LogoutResponse,
     RefreshTokenResponse,
     RegisterResponse,
     RequestPasswordResetResponse,
@@ -223,3 +224,20 @@ async def refresh_token(
         refresh_token=result.refresh_token,
         refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
     )
+
+
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def logout(
+    response: Response, current_account: Account = Depends(get_current_account)
+) -> LogoutResponse:
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    return LogoutResponse(message="Logged out successfully.")
