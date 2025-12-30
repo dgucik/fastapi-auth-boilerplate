@@ -7,6 +7,7 @@ from auth.api.dependencies import get_current_account
 from auth.api.responses import (
     ChangePasswordResponse,
     LoginResponse,
+    RefreshTokenResponse,
     RegisterResponse,
     RequestPasswordResetResponse,
     RequestVerificationTokenResponse,
@@ -16,6 +17,7 @@ from auth.api.responses import (
 from auth.api.schemas import (
     ChangePasswordRequest,
     LoginRequest,
+    RefreshTokenRequest,
     RegisterRequest,
     RequestPasswordResetRequest,
     RequestVerificationTokenRequest,
@@ -24,6 +26,7 @@ from auth.api.schemas import (
 )
 from auth.application.commands.change_password import ChangePasswordCommand
 from auth.application.commands.login import LoginCommand, LoginDto
+from auth.application.commands.refresh_token import RefreshTokenCommand, RefreshTokenDto
 from auth.application.commands.register import RegisterCommand
 from auth.application.commands.request_password_reset import RequestPasswordResetCommand
 from auth.application.commands.request_verification_token import (
@@ -190,4 +193,33 @@ async def change_password(
 
     return ChangePasswordResponse(
         message="Your password has been changed successfully."
+    )
+
+
+@router.post(
+    "/refresh-token",
+    response_model=RefreshTokenRequest,
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def refresh_token(
+    request: RefreshTokenRequest,
+    response: Response,
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+) -> RefreshTokenResponse:
+    cmd = RefreshTokenCommand(refresh_token=request.refresh_token)
+    result: RefreshTokenDto = await command_bus.dispatch(cmd)  # type: ignore
+    response.set_cookie(
+        key="refresh_token",
+        value=result.refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=result.refresh_token_expires_in_seconds,
+    )
+
+    return RefreshTokenResponse(
+        access_token=result.access_token,
+        refresh_token=result.refresh_token,
+        refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
     )

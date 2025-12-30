@@ -8,6 +8,10 @@ from auth.application.commands.change_password import (
     ChangePasswordHandler,
 )
 from auth.application.commands.login import LoginCommand, LoginHandler
+from auth.application.commands.refresh_token import (
+    RefreshTokenCommand,
+    RefreshTokenHandler,
+)
 from auth.application.commands.register import RegisterCommand, RegisterHandler
 from auth.application.commands.request_password_reset import (
     RequestPasswordResetCommand,
@@ -125,6 +129,10 @@ class AuthContainer(containers.DeclarativeContainer):
         ChangePasswordHandler, uow=uow, hasher=hasher
     )
 
+    refresh_token_handler = providers.Factory(
+        RefreshTokenHandler, uow=uow, token_manager=token_manager
+    )
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
@@ -134,6 +142,7 @@ class AuthContainer(containers.DeclarativeContainer):
             RequestPasswordResetCommand: request_password_reset_handler,
             ResetPasswordCommand: reset_password_handler,
             ChangePasswordCommand: change_password_handler,
+            RefreshTokenCommand: refresh_token_handler,
         }
     )
 
