@@ -8,6 +8,7 @@ from auth import auth_router, auth_routes
 from config.container import AppContainer
 from config.database import close_db_connection, scoped_session_factory
 from config.env import settings
+from config.logging import setup_logging
 
 
 async def db_session_middleware(
@@ -45,6 +46,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
+    setup_logging(settings.LOG_LEVER)
+
     app_container = AppContainer(session_factory=scoped_session_factory)
     app_container.settings.from_pydantic(settings)
 

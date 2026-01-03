@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass
 
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from starlette import status
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -36,6 +39,13 @@ class GlobalExceptionHandler:
         metadata = self.registry.get_metadata(exc)
 
         if metadata:
+            if metadata.status_code < 500:
+                logger.info(f"Domain Error: {type(exc).__name__} - {exc}")
+            else:
+                logger.error(
+                    f"Server Error at {request.url.path}: {exc}", exc_info=True
+                )
+
             return JSONResponse(
                 status_code=metadata.status_code,
                 content={
