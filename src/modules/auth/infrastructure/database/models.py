@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from database import Base
+from config.database import Base
 from shared.infrastructure.outbox import OutboxMixin
 
 

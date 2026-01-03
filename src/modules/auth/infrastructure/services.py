@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import UTC, datetime, timedelta
 from email.message import EmailMessage
@@ -16,7 +17,9 @@ from auth.domain.interfaces import (
     TokenScope,
 )
 from auth.infrastructure.exceptions import InvalidTokenException, TokenExpiredException
-from settings import MailSettings
+from config.env import MailSettings
+
+logger = logging.getLogger(__name__)
 
 BCRYPT_MAX_LENGTH: Final[int] = 72
 
@@ -26,11 +29,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class BcryptPasswordHasher(PasswordHasher):
     def hash(self, password: str) -> str:
         truncated_password = password.encode("utf-8")[:BCRYPT_MAX_LENGTH]
-        return str(pwd_context.hash(truncated_password))
+        hashed = pwd_context.hash(truncated_password)
+        logger.debug("Password hashed successfully")
+        return str(hashed)
 
     def verify(self, plain_password: str, hashed_password: str) -> bool:
         truncated_password = plain_password.encode("utf-8")[:BCRYPT_MAX_LENGTH]
-        return bool(pwd_context.verify(truncated_password, hashed_password))
+        result = bool(pwd_context.verify(truncated_password, hashed_password))
+        if not result:
+            logger.debug("Password verification failed")
+        return result
 
 
 class JWTTokenManager(TokenManager):
@@ -55,6 +63,7 @@ class JWTTokenManager(TokenManager):
         refresh_token = self.create_refresh_token(subject)
         refresh_token_expires_in_seconds = self.refresh_token_expires_in_seconds
 
+        logger.debug(f"Auth tokens issued for subject: {subject}")
         return AuthenticationResult(
             access_token, refresh_token, refresh_token_expires_in_seconds
         )
@@ -93,6 +102,7 @@ class JWTTokenManager(TokenManager):
         expire = datetime.now(UTC) + expires_delta
         to_encode = {"exp": expire, "sub": str(subject), "type": token_type}
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        logger.debug(f"Token created: {token_type} for subject: {subject}")
         return str(encoded_jwt)
 
     def decode_token(self, token: str, expected_type: TokenScope) -> str:
@@ -102,7 +112,9 @@ class JWTTokenManager(TokenManager):
             if payload.get("type") != expected_type:
                 raise InvalidTokenException("Invalid token type")
 
-            return str(payload.get("sub"))
+            subject = str(payload.get("sub"))
+            logger.debug(f"Token decoded successfully for subject: {subject}")
+            return subject
         except ExpiredSignatureError as e:
             raise TokenExpiredException from e
         except JWTError as e:
@@ -154,3 +166,4 @@ class AioSmtpMailSender(MailSender):
             use_tls=False,
             start_tls=True,
         )
+        logger.info(f"Email sent to {recipient}: {subject}")

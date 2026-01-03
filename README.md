@@ -54,6 +54,11 @@ Code is organized into independent business modules (e.g., `auth`, `users`).
 
 ```text
 src/
+├── config/                         # Infrastructure & Configuration Center
+│   ├── container.py                # Root DI Container (composes module containers)
+│   ├── database.py                 # DB Engine, Scoped Session, Base ORM
+│   ├── env.py                      # Environment variables (Pydantic Settings)
+│   └── logging.py                  # Logging config (ContextVar, Filter, Setup)
 ├── modules/                        # Independent Business Modules
 │   ├── auth/
 │   │   ├── api/                    # Routes / Controllers
@@ -71,10 +76,8 @@ src/
 │   ├── application/
 │   ├── domain/
 │   └── infrastructure/
-├── container.py                    # Main DI Container (Wiring modules together)
-├── database.py                     # Database engine, seesion setup & ORM Base
 ├── main.py                         # App Entrypoint
-└── settings.py                     # App configuration, env variables
+└── middlewares.py                  # Request/Response Processing Layers
 ```
 
 ## 🚀 Getting Started

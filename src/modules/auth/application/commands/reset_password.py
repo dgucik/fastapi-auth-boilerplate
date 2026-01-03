@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -9,6 +10,8 @@ from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import PasswordHasher, TokenManager, TokenScope
 from auth.domain.value_objects import PlainPassword
 from shared.application.cqrs import Command, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -47,3 +50,5 @@ class ResetPasswordHandler(Handler[ResetPasswordCommand, None]):
             await self._uow.accounts.update(account)
 
             await self._uow.commit()
+
+        logger.info(f"Password reset completed for account: {account_id}")

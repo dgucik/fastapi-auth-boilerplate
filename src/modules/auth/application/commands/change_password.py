@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -10,6 +11,8 @@ from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import PasswordHasher
 from auth.domain.value_objects import PlainPassword
 from shared.application.cqrs import Command, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -45,3 +48,5 @@ class ChangePasswordHandler(Handler[ChangePasswordCommand, None]):
             await self._uow.accounts.update(account)
 
             await self._uow.commit()
+
+        logger.info(f"Password changed for account: {command.account_id}")

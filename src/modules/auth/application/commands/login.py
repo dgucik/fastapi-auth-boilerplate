@@ -1,9 +1,12 @@
+import logging
 from dataclasses import dataclass
 
 from auth.application.uow import AuthUnitOfWork
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.value_objects import Email, PlainPassword
 from shared.application.cqrs import Command, Dto, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,7 @@ class LoginHandler(Handler[LoginCommand, LoginDto]):
 
             await self._uow.commit()
 
+        logger.info(f"Login successful for email: {command.email}")
         return LoginDto(
             response.access_token,
             response.refresh_token,

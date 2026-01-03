@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
@@ -7,6 +8,8 @@ from auth.domain.interfaces import TokenManager
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.domain.value_objects import Email, PlainPassword
 from shared.application.cqrs import Command, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -51,3 +54,5 @@ class RegisterHandler(Handler[RegisterCommand, None]):
             account.request_verification(token)
 
             await self._uow.commit()
+
+        logger.info(f"Registration successful for email: {command.email}")

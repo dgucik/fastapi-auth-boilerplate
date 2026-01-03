@@ -1,6 +1,10 @@
+import logging
+
 from auth.domain.events import PasswordResetRequestedDomainEvent
 from auth.domain.interfaces import MailSender
 from shared.application.event_handling import DomainEventHandler
+
+logger = logging.getLogger(__name__)
 
 
 class SendPasswordResetMail(DomainEventHandler[PasswordResetRequestedDomainEvent]):
@@ -19,3 +23,4 @@ class SendPasswordResetMail(DomainEventHandler[PasswordResetRequestedDomainEvent
             template_name=template_name,
             context=context,
         )
+        logger.info(f"Password reset mail enqueued for: {event.email.value}")

@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 from auth.application.exceptions import AccountDoesNotExistException
@@ -5,6 +6,8 @@ from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import TokenManager
 from auth.domain.value_objects import Email
 from shared.application.cqrs import Command, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -31,3 +34,5 @@ class RequestPasswordResetHandler(Handler[RequestPasswordResetCommand, None]):
             account.request_password_reset(token)
 
             await self._uow.commit()
+
+        logger.info(f"Password reset requested for email: {command.email}")
