@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from settings import settings
+from config.env import settings
 
 connect_args: dict[str, Any] = {}
 

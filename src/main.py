@@ -5,9 +5,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 
 from auth import auth_router, auth_routes
-from container import AppContainer
-from database import close_db_connection, scoped_session_factory
-from settings import settings
+from config.container import AppContainer
+from config.database import close_db_connection, scoped_session_factory
+from config.env import settings
 
 
 async def db_session_middleware(
