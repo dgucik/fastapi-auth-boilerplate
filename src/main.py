@@ -1,60 +1,18 @@
 import asyncio
 import logging
-import uuid
-from collections.abc import AsyncGenerator, Awaitable, Callable
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 
 from auth import auth_router, auth_routes
 from config.container import AppContainer
 from config.database import close_db_connection, scoped_session_factory
 from config.env import settings
-from config.logging import request_id_var, setup_logging
-from shared.application.exceptions import ApplicationException
-from shared.domain.exceptions import DomainException
+from config.logging import setup_logging
+from middlewares import db_session_middleware, logging_middleware, request_id_middleware
 
 logger = logging.getLogger(__name__)
-
-
-async def logging_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    try:
-        response = await call_next(request)
-        return response
-    except (DomainException, ApplicationException) as e:
-        logger.info(f"Domain Error: {type(e).__name__} - {e}")
-        raise e
-    except Exception as e:
-        logger.error(f"Server Error: {e}", exc_info=True)
-        raise e
-
-
-async def request_id_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
-    token = request_id_var.set(request_id)
-    try:
-        response = await call_next(request)
-        response.headers["X-Request-ID"] = request_id
-        return response
-    finally:
-        request_id_var.reset(token)
-
-
-async def db_session_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    try:
-        response = await call_next(request)
-        logger.debug(
-            f"Request completed: {request.method} {request.url.path} - {response.status_code}"  # noqa: E501
-        )
-        return response
-    finally:
-        await scoped_session_factory.remove()
 
 
 @asynccontextmanager
@@ -98,7 +56,7 @@ def create_app() -> FastAPI:
 
     app.state.container = app_container
 
-    # --- Middleware ---
+    # --- Middlewares ---
     app.middleware("http")(db_session_middleware)
     app.middleware("http")(logging_middleware)
     app.middleware("http")(request_id_middleware)
