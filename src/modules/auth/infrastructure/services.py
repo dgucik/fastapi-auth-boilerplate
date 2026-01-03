@@ -16,7 +16,7 @@ from auth.domain.interfaces import (
     TokenScope,
 )
 from auth.infrastructure.exceptions import InvalidTokenException, TokenExpiredException
-from config import MailSettings
+from settings import MailSettings
 
 BCRYPT_MAX_LENGTH: Final[int] = 72
 

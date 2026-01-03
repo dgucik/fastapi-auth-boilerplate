@@ -71,9 +71,10 @@ src/
 │   ├── application/
 │   ├── domain/
 │   └── infrastructure/
-├── config.py                       # Global Configuration
 ├── container.py                    # Main DI Container (Wiring modules together)
-└── main.py                         # App Entrypoint
+├── database.py                     # Database engine, seesion setup & ORM Base
+├── main.py                         # App Entrypoint
+└── settings.py                     # App configuration, env variables
 ```
 
 ## 🚀 Getting Started
