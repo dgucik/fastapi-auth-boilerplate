@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 from shared.application.event_handling import DomainEventBus, DomainEventRegistry
+
+logger = logging.getLogger(__name__)
 
 
 class OutboxStatus(StrEnum):
@@ -82,6 +85,7 @@ class OutboxProcessor:
             if not records:
                 return 0
 
+            processed_count = 0
             for record in records:
                 try:
                     event_cls = self._registry.get_class(record.event_type)
@@ -91,6 +95,10 @@ class OutboxProcessor:
 
                     record.status = OutboxStatus.PROCESSED
                     record.processed_at = datetime.now(UTC)
+                    processed_count += 1
+                    logger.debug(
+                        f"Outbox event processed: {record.event_type} (id={record.id})"
+                    )
 
                 except Exception as e:
                     record.attempts += 1
@@ -98,17 +106,30 @@ class OutboxProcessor:
 
                     if record.attempts >= self.MAX_ATTEMPTS:
                         record.status = OutboxStatus.FAILED
+                        logger.warning(
+                            f"Outbox event failed permanently: {record.event_type} "
+                            f"(id={record.id}, attempts={record.attempts})"
+                        )
                     else:
                         delay = (2**record.attempts) * 10
                         record.scheduled_at = datetime.now(UTC) + timedelta(
                             seconds=delay
                         )
+                        logger.debug(
+                            f"Outbox event scheduled for retry: {record.event_type} "
+                            f"(id={record.id}, attempt={record.attempts}, delay={delay}s)"  # noqa: E501
+                        )
 
             await session.commit()
+            if processed_count > 0:
+                logger.info(f"Outbox batch processed: {processed_count} events")
             return len(records)
 
     async def run_forever(self, interval: float = 0.5) -> None:
+        logger.info("Outbox processor started")
         while True:
             count = await self._process_batch()
             if count == 0:
                 await asyncio.sleep(interval)
+            else:
+                logger.debug(f"Outbox processed {count} records, continuing...")

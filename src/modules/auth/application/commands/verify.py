@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -5,6 +6,8 @@ from auth.application.exceptions import AccountDoesNotExistException
 from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import TokenManager, TokenScope
 from shared.application.cqrs import Command, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -32,3 +35,5 @@ class VerifyEmailHandler(Handler[VerifyEmailCommand, None]):
             await self._uow.accounts.update(account)
 
             await self._uow.commit()
+
+        logger.info(f"Email verified for account: {account_id}")

@@ -1,3 +1,4 @@
+import logging
 from abc import abstractmethod
 from types import TracebackType
 
@@ -8,6 +9,8 @@ from shared.application.uow import UnitOfWork
 from shared.domain.registry import AggregateRegistry
 from shared.infrastructure.exceptions import SessionNotInitializedException
 from shared.infrastructure.outbox import OutboxMixin
+
+logger = logging.getLogger(__name__)
 
 
 class BaseSqlAlchemyUnitOfWork(UnitOfWork):
@@ -50,12 +53,14 @@ class BaseSqlAlchemyUnitOfWork(UnitOfWork):
 
         await self._session.commit()
         AggregateRegistry.clear()
+        logger.debug("UnitOfWork committed successfully")
 
     async def rollback(self) -> None:
         if not self._session:
             raise SessionNotInitializedException
 
         await self._session.rollback()
+        logger.debug("UnitOfWork rolled back")
 
     @abstractmethod
     def _get_outbox_model(self) -> type[OutboxMixin]:

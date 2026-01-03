@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass
 
 from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import TokenManager, TokenScope
 from shared.application.cqrs import Command, Dto, Handler
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -29,6 +32,7 @@ class RefreshTokenHandler(Handler[RefreshTokenCommand, RefreshTokenDto]):
 
         response = self._token_manager.issue_auth_tokens(account_id)
 
+        logger.info(f"Token refreshed for account: {account_id}")
         return RefreshTokenDto(
             response.access_token,
             response.refresh_token,

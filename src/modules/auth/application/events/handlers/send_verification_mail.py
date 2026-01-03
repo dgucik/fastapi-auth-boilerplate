@@ -1,6 +1,10 @@
+import logging
+
 from auth.domain.events import VerificationRequestedDomainEvent
 from auth.domain.interfaces import MailSender
 from shared.application.event_handling import DomainEventHandler
+
+logger = logging.getLogger(__name__)
 
 
 class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent]):
@@ -19,3 +23,4 @@ class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent])
             template_name=template_name,
             context=context,
         )
+        logger.info(f"Verification mail enqueued for: {event.email.value}")
