@@ -1,7 +1,7 @@
 # ruff: noqa: B008
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 
 from auth.api.dependencies import get_current_account
 from auth.api.responses import LoginResponse, RefreshTokenResponse, RegisterResponse
@@ -28,7 +28,6 @@ from auth.application.commands.verify import VerifyEmailCommand
 from auth.application.exceptions import AccountDoesNotExistException
 from auth.container import AuthContainer
 from auth.domain.entities.account import Account
-from auth.domain.exceptions import InvalidPasswordException
 from shared.api.responses import MessageResponse
 from shared.infrastructure.buses import CommandBus
 
@@ -62,26 +61,21 @@ async def login(
 ) -> LoginResponse:
     cmd = LoginCommand(email=request.email, password=request.password)
 
-    try:
-        result: LoginDto = await command_bus.dispatch(cmd)  # type: ignore
-        response.set_cookie(
-            key="refresh_token",
-            value=result.refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="lax",
-            max_age=result.refresh_token_expires_in_seconds,
-        )
+    result: LoginDto = await command_bus.dispatch(cmd)  # type: ignore
+    response.set_cookie(
+        key="refresh_token",
+        value=result.refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=result.refresh_token_expires_in_seconds,
+    )
 
-        return LoginResponse(
-            access_token=result.access_token,
-            refresh_token=result.refresh_token,
-            refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
-        )
-    except InvalidPasswordException as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
-        ) from e
+    return LoginResponse(
+        access_token=result.access_token,
+        refresh_token=result.refresh_token,
+        refresh_token_expires_in_seconds=result.refresh_token_expires_in_seconds,
+    )
 
 
 @router.post(

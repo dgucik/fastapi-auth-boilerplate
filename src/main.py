@@ -8,7 +8,6 @@ from auth import auth_router, auth_routes
 from container import AppContainer
 from database import close_db_connection, scoped_session_factory
 from settings import settings
-from shared.infrastructure.exception_handler import GlobalExceptionHandler
 
 
 async def db_session_middleware(
@@ -46,8 +45,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
-    exception_handler = GlobalExceptionHandler()
-
     app_container = AppContainer(session_factory=scoped_session_factory)
     app_container.settings.from_pydantic(settings)
 
@@ -64,7 +61,8 @@ def create_app() -> FastAPI:
     app.middleware("http")(db_session_middleware)
 
     # -- Exception Handlers ---
-    app.add_exception_handler(Exception, exception_handler)
+    exc_handler = app_container.exception_handler()
+    app.add_exception_handler(Exception, exc_handler)
 
     return app
 
