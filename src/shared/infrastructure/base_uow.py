@@ -7,7 +7,7 @@ from shared.application.event_handling import DomainEventBus, DomainEventRegistr
 from shared.application.uow import UnitOfWork
 from shared.domain.registry import AggregateRegistry
 from shared.infrastructure.exceptions import SessionNotInitializedException
-from shared.infrastructure.outbox_mixin import OutboxMixin
+from shared.infrastructure.outbox import OutboxMixin
 
 
 class BaseSqlAlchemyUnitOfWork(UnitOfWork):

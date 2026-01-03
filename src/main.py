@@ -5,8 +5,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 
 from auth import auth_router, auth_routes
-from config import close_db_connection, scoped_session_factory, settings
 from container import AppContainer
+from database import close_db_connection, scoped_session_factory
+from settings import settings
 from shared.infrastructure.exception_handler import GlobalExceptionHandler
 
 

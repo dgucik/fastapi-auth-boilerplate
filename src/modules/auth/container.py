@@ -46,7 +46,7 @@ from auth.infrastructure.services import (
 )
 from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
 from shared.infrastructure.event_registry import DomainEventRegistryImpl
-from shared.infrastructure.outbox_processor import OutboxProcessor
+from shared.infrastructure.outbox import OutboxProcessor
 
 
 class AuthContainer(containers.DeclarativeContainer):
