@@ -2,6 +2,7 @@ from collections.abc import Callable
 from typing import Any
 
 from dependency_injector import containers, providers
+from starlette import status
 
 from auth.application.commands.change_password import (
     ChangePasswordCommand,
@@ -35,6 +36,7 @@ from auth.domain.events import (
     PasswordResetRequestedDomainEvent,
     VerificationRequestedDomainEvent,
 )
+from auth.domain.exceptions import InvalidPasswordException
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.infrastructure.database.models import AuthOutboxEvent
@@ -46,6 +48,7 @@ from auth.infrastructure.services import (
 )
 from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
 from shared.infrastructure.event_registry import DomainEventRegistryImpl
+from shared.infrastructure.exception_handler import ExceptionMetadata
 from shared.infrastructure.outbox import OutboxProcessor
 
 
@@ -184,4 +187,13 @@ class AuthContainer(containers.DeclarativeContainer):
         registry=domain_event_registry,
         outbox_model=providers.Object(AuthOutboxEvent),
         batch_size=20,
+    )
+
+    # --- Exception Mappings ---
+    exception_mappings = providers.Dict(
+        {
+            InvalidPasswordException: ExceptionMetadata(
+                status.HTTP_401_UNAUTHORIZED, "invalid_password"
+            )
+        }
     )
