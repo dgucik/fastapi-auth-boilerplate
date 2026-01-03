@@ -6,7 +6,7 @@ from shared.domain.registry import AggregateRegistry
 TAggregate = TypeVar("TAggregate", bound=AggregateRoot)
 
 
-class BaseRepository(Generic[TAggregate]):
+class BaseSqlAlchemyRepository(Generic[TAggregate]):
     def __init__(self, session: Any):
         self._session = session
 

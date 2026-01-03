@@ -8,10 +8,10 @@ from auth.domain.entities.account import Account
 from auth.domain.repositories import AccountRepository
 from auth.domain.value_objects import Email
 from auth.infrastructure.database.models import AccountModel
-from shared.infrastructure.repositories import BaseRepository
+from shared.infrastructure.repositories import BaseSqlAlchemyRepository
 
 
-class SqlAlchemyAccountRepository(AccountRepository, BaseRepository[Account]):
+class SqlAlchemyAccountRepository(AccountRepository, BaseSqlAlchemyRepository[Account]):
     def __init__(self, session: AsyncSession):
         self._session = session
 
