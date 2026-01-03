@@ -8,7 +8,7 @@ from auth.domain.entities.account import Account
 from auth.domain.repositories import AccountRepository
 from auth.domain.value_objects import Email
 from auth.infrastructure.database.models import AccountModel
-from shared.infrastructure.repositories import BaseSqlAlchemyRepository
+from shared.infrastructure.base_repository import BaseSqlAlchemyRepository
 
 
 class SqlAlchemyAccountRepository(AccountRepository, BaseSqlAlchemyRepository[Account]):
