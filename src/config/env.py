@@ -4,6 +4,10 @@ from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class KafkaSettings(BaseModel):
+    BOOTSTRAP_SERVERS: str
+
+
 class MailSettings(BaseModel):
     USERNAME: str
     PASSWORD: str
@@ -43,12 +47,13 @@ class TokenSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    LOG_LEVEL: str = "INFO"
+    LOG_LEVEL: str = "DEBUG"
     APP_BASE_URL: str
     DB_ECHO: bool = False
     mail: MailSettings
     db: DatabaseSettings
     token: TokenSettings
+    kafka: KafkaSettings
 
     # Pydantic Configuration
     model_config = SettingsConfigDict(

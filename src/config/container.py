@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from typing import Any
 
+from aiokafka import AIOKafkaProducer
 from dependency_injector import containers, providers
 from starlette import status
 
@@ -17,6 +18,7 @@ from shared.domain.exceptions import (
     EntityNotFoundException,
     ValidationException,
 )
+from shared.infrastructure.event_messaging import KafkaIntegrationEventPublisher
 from shared.infrastructure.exception_handler import (
     ExceptionMetadata,
     ExceptionRegistry,
@@ -69,9 +71,21 @@ class AppContainer(containers.DeclarativeContainer):
         }
     )
 
+    # --- Integration Events ----
+    kafka_producer = providers.Singleton(
+        AIOKafkaProducer, bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS
+    )
+
+    kafka_integration_event_publisher = providers.Factory(
+        KafkaIntegrationEventPublisher, producer=kafka_producer
+    )
+
     # --- Module Containers ---
     auth = providers.Container(
-        AuthContainer, settings=settings, session_factory=session_factory
+        AuthContainer,
+        settings=settings,
+        session_factory=session_factory,
+        integration_event_publisher=kafka_integration_event_publisher,
     )
 
     # --- Exception Handling ---

@@ -64,6 +64,8 @@ class DomainEventRegistry(ABC):
 # --- Integration Events ---
 @dataclass(frozen=True)
 class IntegrationEvent(ABC):
+    topic: str
+
     @abstractmethod
     def to_dict(self) -> dict[str, Any]:
         pass
@@ -77,12 +79,6 @@ class IntegrationEvent(ABC):
 class IntegrationEventPublisher(ABC):
     @abstractmethod
     async def publish(self, event: IntegrationEvent) -> None:
-        pass
-
-
-class DomainToIntegrationHandler[TDomainEvent: DomainEvent](ABC):
-    @abstractmethod
-    async def handle(self, event: TDomainEvent) -> None:
         pass
 
 

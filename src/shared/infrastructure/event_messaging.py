@@ -1,11 +1,16 @@
+import json
 import logging
 from collections.abc import Callable
+
+from aiokafka import AIOKafkaProducer
 
 from shared.application.exceptions import EventReconstructionException
 from shared.application.ports import (
     DomainEventBus,
     DomainEventHandler,
     DomainEventRegistry,
+    IntegrationEvent,
+    IntegrationEventPublisher,
 )
 from shared.domain.events import DomainEvent
 
@@ -57,3 +62,14 @@ class InMemoryDomainEventBus(DomainEventBus):
             handler = handler_factory()
             await handler.handle(event)
         logger.debug(f"Published event: {type(event).__name__}")
+
+
+class KafkaIntegrationEventPublisher(IntegrationEventPublisher):
+    def __init__(self, producer: AIOKafkaProducer):
+        self._producer = producer
+
+    async def publish(self, event: IntegrationEvent) -> None:
+        await self._producer.send_and_wait(
+            topic=event.topic,
+            value=json.dumps(event.to_dict()).encode("utf-8"),
+        )

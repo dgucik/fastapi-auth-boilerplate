@@ -32,6 +32,9 @@ from auth.application.events.domain.send_password_reset_mail import (
     SendPasswordResetMail,
 )
 from auth.application.events.domain.send_verification_mail import SendVerificationMail
+from auth.application.events.domain_to_integration.account_registered import (
+    AccountRegisteredIntegrationHandler,
+)
 from auth.application.exceptions import PasswordsDoNotMatchException
 from auth.application.queries.get_account_by_id import (
     GetAccountByIdHandler,
@@ -56,6 +59,7 @@ from auth.infrastructure.services import (
     BcryptPasswordHasher,
     JWTTokenManager,
 )
+from shared.application.ports import IntegrationEventPublisher
 from shared.infrastructure.cqrs_buses import CommandBus, QueryBus
 from shared.infrastructure.event_messaging import (
     DomainEventRegistryImpl,
@@ -66,6 +70,9 @@ from shared.infrastructure.outbox import OutboxProcessor
 
 
 class AuthContainer(containers.DeclarativeContainer):
+    integration_event_publisher: providers.Dependency[IntegrationEventPublisher] = (
+        providers.Dependency()
+    )
     settings = providers.Configuration()
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
@@ -197,6 +204,10 @@ class AuthContainer(containers.DeclarativeContainer):
         base_url=settings.APP_BASE_URL,
     )
 
+    account_registered_integration_handler = providers.Factory(
+        AccountRegisteredIntegrationHandler, publisher=integration_event_publisher
+    )
+
     # --- Event Bus Subscribers Registration ---
     domain_event_bus.add_kwargs(
         subscribers=providers.Dict(
@@ -206,6 +217,9 @@ class AuthContainer(containers.DeclarativeContainer):
                 ),
                 PasswordResetRequestedDomainEvent: providers.List(
                     send_password_reset_handler.provider
+                ),
+                AccountRegisteredDomainEvent: providers.List(
+                    account_registered_integration_handler.provider
                 ),
             }
         )
