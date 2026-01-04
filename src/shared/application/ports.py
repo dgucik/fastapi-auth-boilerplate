@@ -61,6 +61,31 @@ class DomainEventRegistry(ABC):
         pass
 
 
+# --- Integration Events ---
+@dataclass(frozen=True)
+class IntegrationEvent(ABC):
+    @abstractmethod
+    def to_dict(self) -> dict[str, Any]:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data: dict[str, Any]) -> "IntegrationEvent":
+        pass
+
+
+class IntegrationEventPublisher(ABC):
+    @abstractmethod
+    async def publish(self, event: IntegrationEvent) -> None:
+        pass
+
+
+class DomainToIntegrationHandler[TDomainEvent: DomainEvent](ABC):
+    @abstractmethod
+    async def handle(self, event: TDomainEvent) -> None:
+        pass
+
+
 # --- CQRS ---
 type TMessage = Command | Query
 type TResult = Dto | None

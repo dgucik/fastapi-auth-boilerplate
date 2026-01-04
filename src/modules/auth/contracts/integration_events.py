@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
-from shared.domain.events import IntegrationEvent
+from shared.application.ports import IntegrationEvent
 
 
+@dataclass(frozen=True)
 class AccountRegisteredIntegrationEvent(IntegrationEvent):
     account_id: UUID
 
