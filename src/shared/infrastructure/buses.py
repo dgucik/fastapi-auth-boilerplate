@@ -1,10 +1,10 @@
 import logging
 from collections.abc import Callable
+from typing import Any
 
 from shared.application.cqrs import (
     Command,
     CqrsBus,
-    Dto,
     Handler,
     Query,
     TMessage,
@@ -34,7 +34,7 @@ class CommandBus(GenericCqrsBus[Command, None]):
     pass
 
 
-class QueryBus(GenericCqrsBus[Query, Dto]):
+class QueryBus(GenericCqrsBus[Query, Any]):
     pass
 
 

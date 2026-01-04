@@ -4,6 +4,7 @@ from typing import Any
 from dependency_injector import containers, providers
 from starlette import status
 
+from auth.application.auth_module_api import AuthModuleApi
 from auth.application.commands.change_password import (
     ChangePasswordCommand,
     ChangePasswordHandler,
@@ -31,6 +32,14 @@ from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMail,
 )
 from auth.application.events.handlers.send_verification_mail import SendVerificationMail
+from auth.application.queries.get_account_by_id import (
+    GetAccountByIdHandler,
+    GetAccountByIdQuery,
+)
+from auth.application.queries.get_account_by_token import (
+    GetAccountByTokenHandler,
+    GetAccountByTokenQuery,
+)
 from auth.domain.events import (
     AccountRegisteredDomainEvent,
     PasswordResetRequestedDomainEvent,
@@ -46,7 +55,7 @@ from auth.infrastructure.services import (
     BcryptPasswordHasher,
     JWTTokenManager,
 )
-from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus
+from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus, QueryBus
 from shared.infrastructure.event_registry import DomainEventRegistryImpl
 from shared.infrastructure.exception_handler import ExceptionMetadata
 from shared.infrastructure.outbox import OutboxProcessor
@@ -152,6 +161,25 @@ class AuthContainer(containers.DeclarativeContainer):
     # -- Command Bus ---
     command_bus = providers.Factory(CommandBus, handlers=command_handlers)
 
+    # --- Queries & Handlers ---
+    get_account_by_token_handler = providers.Factory(
+        GetAccountByTokenHandler, uow=uow, token_manager=token_manager
+    )
+
+    get_account_by_id_handler = providers.Factory(
+        GetAccountByIdHandler,
+        uow=uow,
+    )
+
+    query_handlers = providers.Dict(
+        {
+            GetAccountByTokenQuery: get_account_by_token_handler,
+            GetAccountByIdQuery: get_account_by_id_handler,
+        }
+    )
+    # --- Query Bus ---
+    query_bus = providers.Factory(QueryBus, handlers=query_handlers)
+
     # --- Event Handlers ---
     send_verification_mail_handler = providers.Factory(
         SendVerificationMail,
@@ -197,3 +225,6 @@ class AuthContainer(containers.DeclarativeContainer):
             )
         }
     )
+
+    # --- Module Contract ---
+    module_contract = providers.Factory(AuthModuleApi, query_bus=query_bus)
