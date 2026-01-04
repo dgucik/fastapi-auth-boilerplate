@@ -6,15 +6,13 @@ from shared.application.ports import (
     CqrsBus,
     Handler,
     Query,
-    TMessage,
-    TResult,
 )
 from shared.infrastructure.exceptions import BusException
 
 logger = logging.getLogger(__name__)
 
 
-class GenericCqrsBus(CqrsBus[TMessage, TResult]):
+class GenericCqrsBus[TMessage, TResult](CqrsBus[TMessage, TResult]):
     def __init__(self, handlers: dict[type[TMessage], Handler[TMessage, TResult]]):
         self._handlers = handlers
 

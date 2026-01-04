@@ -62,6 +62,10 @@ class DomainEventRegistry(ABC):
 
 
 # --- CQRS ---
+type TMessage = Command | Query
+type TResult = Dto | None
+
+
 @dataclass(frozen=True)
 class Command:
     pass
@@ -77,13 +81,13 @@ class Dto:
     pass
 
 
-class Handler[TMessage: Command | Query, TResult: Dto | None](ABC):
+class Handler[TMessage, TResult](ABC):
     @abstractmethod
     async def handle(self, message: TMessage) -> TResult:
         pass
 
 
-class CqrsBus[TMessage: Command | Query, TResult: Dto | None](ABC):
+class CqrsBus[TMessage, TResult](ABC):
     @abstractmethod
     async def dispatch(self, message: TMessage) -> TResult:
         pass

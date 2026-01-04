@@ -32,6 +32,7 @@ from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMail,
 )
 from auth.application.events.handlers.send_verification_mail import SendVerificationMail
+from auth.application.exceptions import PasswordsDoNotMatchException
 from auth.application.queries.get_account_by_id import (
     GetAccountByIdHandler,
     GetAccountByIdQuery,
@@ -225,7 +226,10 @@ class AuthContainer(containers.DeclarativeContainer):
         {
             InvalidPasswordException: ExceptionMetadata(
                 status.HTTP_401_UNAUTHORIZED, "invalid_password"
-            )
+            ),
+            PasswordsDoNotMatchException: ExceptionMetadata(
+                status.HTTP_400_BAD_REQUEST, "password_do_not_match"
+            ),
         }
     )
 
