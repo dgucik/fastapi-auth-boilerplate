@@ -1,5 +1,5 @@
 from auth.domain.repositories import AccountRepository
-from shared.application.uow import UnitOfWork
+from shared.application.ports import UnitOfWork
 
 
 class AuthUnitOfWork(UnitOfWork):

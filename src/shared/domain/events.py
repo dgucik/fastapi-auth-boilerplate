@@ -13,3 +13,15 @@ class DomainEvent(ABC):
     @abstractmethod
     def from_dict(cls, data: dict[str, Any]) -> "DomainEvent":
         pass
+
+
+@dataclass(frozen=True)
+class IntegrationEvent(ABC):
+    @abstractmethod
+    def to_dict(self) -> dict[str, Any]:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data: dict[str, Any]) -> "IntegrationEvent":
+        pass

@@ -4,7 +4,7 @@ from uuid import UUID
 from auth.application.queries.common_dtos import AccountDto
 from auth.application.uow import AuthUnitOfWork
 from auth.contracts.exceptions import ContractAccountNotFoundException
-from shared.application.cqrs import Handler, Query
+from shared.application.ports import Handler, Query
 
 
 @dataclass(frozen=True)

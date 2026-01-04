@@ -4,13 +4,13 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from middlewares import db_session_middleware, logging_middleware, request_id_middleware
 
 from auth import auth_router, auth_routes
 from config.container import AppContainer
 from config.database import close_db_connection, scoped_session_factory
 from config.env import settings
 from config.logging import setup_logging
-from middlewares import db_session_middleware, logging_middleware, request_id_middleware
 
 logger = logging.getLogger(__name__)
 

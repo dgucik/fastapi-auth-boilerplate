@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from shared.application.cqrs import Dto
+from shared.application.ports import Dto
 
 
 @dataclass(frozen=True)

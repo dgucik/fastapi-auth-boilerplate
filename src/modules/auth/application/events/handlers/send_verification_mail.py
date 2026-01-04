@@ -2,7 +2,7 @@ import logging
 
 from auth.domain.events import VerificationRequestedDomainEvent
 from auth.domain.interfaces import MailSender
-from shared.application.event_handling import DomainEventHandler
+from shared.application.ports import DomainEventHandler
 
 logger = logging.getLogger(__name__)
 

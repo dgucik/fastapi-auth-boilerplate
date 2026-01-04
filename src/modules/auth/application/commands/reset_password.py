@@ -9,7 +9,7 @@ from auth.application.exceptions import (
 from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import PasswordHasher, TokenManager, TokenScope
 from auth.domain.value_objects import PlainPassword
-from shared.application.cqrs import Command, Handler
+from shared.application.ports import Command, Handler
 
 logger = logging.getLogger(__name__)
 
