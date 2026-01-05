@@ -29,6 +29,9 @@ from auth.application.commands.reset_password import (
 )
 from auth.application.commands.send_mail import SendMailCommand, SendMailHandler
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
+
+# --- To dodałem ---
+from auth.application.events.consumers.account_registered import AccountRegistered
 from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMail,
 )
@@ -45,6 +48,7 @@ from auth.application.queries.get_account_by_token import (
     GetAccountByTokenHandler,
     GetAccountByTokenQuery,
 )
+from auth.contracts.integration_events import AccountRegisteredIntegrationEvent
 from auth.domain.events import (
     AccountRegisteredDomainEvent,
     PasswordResetRequestedDomainEvent,
@@ -65,9 +69,12 @@ from shared.infrastructure.cqrs_buses import CommandBus, QueryBus
 from shared.infrastructure.event_messaging import (
     DomainEventRegistryImpl,
     InMemoryDomainEventBus,
+    KafkaIntegrationEventConsumer,
 )
 from shared.infrastructure.exception_handler import ExceptionMetadata
 from shared.infrastructure.outbox import OutboxProcessor
+
+# --- koniec ----
 
 
 class AuthContainer(containers.DeclarativeContainer):
@@ -249,6 +256,26 @@ class AuthContainer(containers.DeclarativeContainer):
                 status.HTTP_400_BAD_REQUEST, "password_do_not_match"
             ),
         }
+    )
+
+    # --- Kafka Consumer ---
+    account_registered_handler = providers.Factory(AccountRegistered)
+
+    integration_event_map = providers.Dict(
+        {
+            "AccountRegisteredIntegrationEvent": (
+                AccountRegisteredIntegrationEvent,
+                account_registered_handler,
+            )
+        }
+    )
+
+    kafka_consumer = providers.Singleton(
+        KafkaIntegrationEventConsumer,
+        bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS,
+        group_id="auth_consumer_group",
+        topics=providers.List("account.registered"),
+        event_map=integration_event_map,
     )
 
     # --- Module Contract ---

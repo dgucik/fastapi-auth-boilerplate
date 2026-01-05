@@ -71,7 +71,7 @@ class AppContainer(containers.DeclarativeContainer):
         }
     )
 
-    # --- Integration Events ----
+    # --- Integration Events Publisher ----
     kafka_producer = providers.Singleton(
         AIOKafkaProducer, bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS
     )

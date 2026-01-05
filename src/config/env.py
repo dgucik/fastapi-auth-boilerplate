@@ -47,7 +47,7 @@ class TokenSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    LOG_LEVEL: str = "DEBUG"
+    LOG_LEVEL: str = "INFO"
     APP_BASE_URL: str
     DB_ECHO: bool = False
     mail: MailSettings
