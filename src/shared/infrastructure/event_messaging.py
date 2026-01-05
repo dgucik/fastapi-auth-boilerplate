@@ -68,8 +68,9 @@ class KafkaIntegrationEventPublisher(IntegrationEventPublisher):
     def __init__(self, producer: AIOKafkaProducer):
         self._producer = producer
 
-    async def publish(self, event: IntegrationEvent) -> None:
+    async def publish(self, topic: str, event: IntegrationEvent) -> None:
+        payload = json.dumps(event.to_dict()).encode("utf-8")
         await self._producer.send_and_wait(
-            topic=event.topic,
-            value=json.dumps(event.to_dict()).encode("utf-8"),
+            topic=topic,
+            value=payload,
         )

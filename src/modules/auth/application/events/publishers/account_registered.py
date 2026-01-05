@@ -18,9 +18,9 @@ class AccountRegisteredIntegrationHandler(
 
     async def handle(self, event: AccountRegisteredDomainEvent) -> None:
         integration_event = AccountRegisteredIntegrationEvent(
-            topic="account.registered", account_id=event.account_id
+            account_id=event.account_id
         )
-        await self._publisher.publish(integration_event)
+        await self._publisher.publish("account.registered", integration_event)
         logger.info(
             f"Integration event: {type(integration_event).__name__} has been published."
         )
