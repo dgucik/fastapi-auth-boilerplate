@@ -27,6 +27,7 @@ from auth.application.commands.reset_password import (
     ResetPasswordCommand,
     ResetPasswordHandler,
 )
+from auth.application.commands.send_mail import SendMailCommand, SendMailHandler
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
 from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMail,
@@ -156,6 +157,8 @@ class AuthContainer(containers.DeclarativeContainer):
         RefreshTokenHandler, uow=uow, token_manager=token_manager
     )
 
+    send_mail_handler = providers.Factory(SendMailHandler, mail_sender=mail_sender)
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
@@ -166,6 +169,7 @@ class AuthContainer(containers.DeclarativeContainer):
             ResetPasswordCommand: reset_password_handler,
             ChangePasswordCommand: change_password_handler,
             RefreshTokenCommand: refresh_token_handler,
+            SendMailCommand: send_mail_handler,
         }
     )
 
@@ -194,13 +198,13 @@ class AuthContainer(containers.DeclarativeContainer):
     # --- Event Handlers ---
     send_verification_mail_handler = providers.Factory(
         SendVerificationMail,
-        mail_sender=mail_sender,
+        command_bus=command_bus,
         base_url=settings.APP_BASE_URL,
     )
 
     send_password_reset_handler = providers.Factory(
         SendPasswordResetMail,
-        mail_sender=mail_sender,
+        command_bus=command_bus,
         base_url=settings.APP_BASE_URL,
     )
 
