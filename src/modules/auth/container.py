@@ -28,11 +28,11 @@ from auth.application.commands.reset_password import (
     ResetPasswordHandler,
 )
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
-from auth.application.events.domain.send_password_reset_mail import (
+from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMail,
 )
-from auth.application.events.domain.send_verification_mail import SendVerificationMail
-from auth.application.events.domain_to_integration.account_registered import (
+from auth.application.events.handlers.send_verification_mail import SendVerificationMail
+from auth.application.events.publishers.account_registered import (
     AccountRegisteredIntegrationHandler,
 )
 from auth.application.exceptions import PasswordsDoNotMatchException
