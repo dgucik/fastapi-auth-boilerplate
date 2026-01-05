@@ -7,7 +7,7 @@ from auth.application.uow import AuthUnitOfWork
 from auth.domain.interfaces import TokenManager
 from auth.domain.services.account_registration import AccountRegistrationService
 from auth.domain.value_objects import Email, PlainPassword
-from shared.application.cqrs import Command, Handler
+from shared.application.ports import Command, Handler
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,7 @@ from types import TracebackType
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from shared.application.event_handling import DomainEventBus, DomainEventRegistry
-from shared.application.uow import UnitOfWork
+from shared.application.ports import DomainEventBus, DomainEventRegistry, UnitOfWork
 from shared.domain.registry import AggregateRegistry
 from shared.infrastructure.exceptions import SessionNotInitializedException
 from shared.infrastructure.outbox import OutboxMixin

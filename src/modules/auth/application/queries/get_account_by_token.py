@@ -10,7 +10,7 @@ from auth.contracts.exceptions import (
 )
 from auth.domain.interfaces import TokenManager, TokenScope
 from auth.infrastructure.exceptions import InvalidTokenException, TokenExpiredException
-from shared.application.cqrs import Handler, Query
+from shared.application.ports import Handler, Query
 
 
 @dataclass(frozen=True)

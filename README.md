@@ -3,6 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache%20Kafka-blue?style=flat&logo=apachekafka&logoColor=white)
 ![Docker](https://img.shields.io/badge/Containerized-Docker-blue?logo=docker)
 ![Poetry](https://img.shields.io/badge/Poetry-Managed-blueviolet?logo=poetry&logoColor=white)
 ![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black)
@@ -40,13 +41,13 @@ This boilerplate uses **Vertical Slicing** (Modular Monolith) to organize code b
 * **CQRS (Command Query Responsibility Segregation):**
     * **Commands:** Handle write operations and state changes.
     * **Queries:** Handle read operations.
-* **Event-Driven Architecture (In-Memory):**
-    * **Domain Events:** Used strictly *within* a module to trigger internal side effects (e.g., sending a confirmation email immediately after account registration).
-    * **Integration Events:** Published via the **In-Memory Event Bus** to notify the rest of the system about state changes.
+* **Event-Driven Architecture:**
+    * **Domain Events:** Handled by **In-Memory Event Bus** within a module to trigger internal side effects (e.g., sending a confirmation email immediately after account registration).
+    * **Integration Events:** Published via the **Apache Kafka** to notify the rest of the system about state changes.
 * **Module Communication:**
     * Modules are autonomous "black boxes" that do not import each other's internal code. Communication happens in two ways:
         1. **Synchronous (Contracts via DI):** When a module needs data from another (e.g., `Users` needs identity details from `Auth`), it uses **Public Contracts** (Interfaces) injected via **Dependency Injection**.
-        2. **Asynchronous (Integration Events):** Modules subscribe to Integration Events from other modules to react to changes (e.g., `Users` module creating a User Entry when the `AccountRegistered` integration event occurs).
+        2. **Asynchronous (Integration Events):** Modules communicate via Kafka. A module publishes an IntegrationEvent to a Kafka topic, and interested modules (subscribers) consume these events through dedicated Integration Event Handlers (e.g., `Users` module creating a User Entry when the `AccountRegistered` integration event occurs).
 
 ## 📂 Project Structure
 

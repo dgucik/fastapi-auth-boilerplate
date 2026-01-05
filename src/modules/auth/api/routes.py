@@ -29,7 +29,7 @@ from auth.application.exceptions import AccountDoesNotExistException
 from auth.container import AuthContainer
 from auth.domain.entities.account import Account
 from shared.api.responses import MessageResponse
-from shared.infrastructure.buses import CommandBus
+from shared.infrastructure.cqrs_buses import CommandBus
 
 router = APIRouter(tags=["Auth"])
 

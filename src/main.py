@@ -4,13 +4,13 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from middlewares import db_session_middleware, logging_middleware, request_id_middleware
 
 from auth import auth_router, auth_routes
 from config.container import AppContainer
 from config.database import close_db_connection, scoped_session_factory
 from config.env import settings
 from config.logging import setup_logging
-from middlewares import db_session_middleware, logging_middleware, request_id_middleware
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting application...")
     container: AppContainer = app.state.container
 
+    kafka_producer = container.kafka_producer()
+    await kafka_producer.start()
+    logger.info("Kafka producer started.")
+
     outbox_tasks = []
 
     auth_processor = container.auth().outbox_processor()
@@ -28,9 +32,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             auth_processor.run_forever(interval=0.5), name="auth_outbox"
         )
     )
-    logger.info("Outbox processor started")
+    logger.info("Outbox processor started.")
 
-    logger.info("Application started successfully")
+    logger.info("Application started successfully.")
     yield
 
     logger.info("Shutting down application...")
@@ -39,6 +43,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     if outbox_tasks:
         await asyncio.gather(*outbox_tasks, return_exceptions=True)
+
+    await kafka_producer.stop()
+    logger.info("Kafka producer stopped.")
 
     await close_db_connection()
     logger.info("Application shutdown complete")

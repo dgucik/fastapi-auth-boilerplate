@@ -24,7 +24,8 @@ dependencies = [
     "dependency-injector (>=4.48.3,<5.0.0)",
     "bcrypt (==4.0.0)",
     "aiosmtplib (>=5.0.0,<6.0.0)",
-    "jinja2 (>=3.1.6,<4.0.0)"
+    "jinja2 (>=3.1.6,<4.0.0)",
+    "aiokafka (>=0.13.0,<0.14.0)"
 ]
 
 [build-system]
@@ -33,10 +34,10 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "ruff (>=0.14.9,<0.15.0)",
-    "mypy (>=1.19.0,<2.0.0)",
-    "pre-commit (>=4.5.0,<5.0.0)",
-    "python-dotenv (>=1.2.1,<2.0.0)"
+    "ruff (>=0.9.0)",
+    "mypy (>=1.14.0)",
+    "pre-commit (>=4.0.0)",
+    "python-dotenv (>=1.0.1)"
 ]
 
 [tool.poetry]
@@ -49,26 +50,27 @@ package-mode = false
 [tool.ruff]
 line-length = 88
 target-version = "py312"
-select = ["E", "F", "I", "UP", "B", "S"]
-extend-ignore = ["D100", "D104", "D105", "D106", "D107"]
-src = ["src"]
+src = ["."]
 exclude = ["alembic"]
 
-[tool.ruff.pydocstyle]
-convention = "google"
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "S"]
+ignore = ["D100", "D104", "D105", "D106", "D107"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["auth", "config", "shared"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
-mypy_path = ["src", "src/modules"]
+mypy_path = ["src", "src/modules", "."]
 namespace_packages = true
 explicit_package_bases = true
-
 
 [[tool.mypy.overrides]]
 module = ["passlib.*", "jose.*"]

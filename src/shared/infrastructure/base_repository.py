@@ -1,12 +1,10 @@
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from shared.domain.primitives import AggregateRoot
 from shared.domain.registry import AggregateRegistry
 
-TAggregate = TypeVar("TAggregate", bound=AggregateRoot)
 
-
-class BaseSqlAlchemyRepository(Generic[TAggregate]):
+class BaseSqlAlchemyRepository[TAggregate: AggregateRoot]:
     def __init__(self, session: Any):
         self._session = session
 

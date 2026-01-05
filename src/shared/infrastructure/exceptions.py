@@ -28,3 +28,8 @@ class ExternalServiceException(InfrastructureException):
     """Base exception for external service integration errors"""
 
     pass
+
+
+class ConsumerNotStartedException(InfrastructureException):
+    def __init__(self, message: str = "Consumer not started."):
+        super().__init__(message)

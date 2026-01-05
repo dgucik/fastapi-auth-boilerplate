@@ -1,5 +1,4 @@
 import uuid
-from abc import ABC
 from dataclasses import dataclass, field
 
 from shared.domain.events import DomainEvent
@@ -11,7 +10,7 @@ class ValueObject:
 
 
 @dataclass(eq=False)
-class Entity(ABC):
+class Entity:
     id: uuid.UUID = field(default_factory=uuid.uuid4, kw_only=True)
 
     def __eq__(self, other: object) -> bool:

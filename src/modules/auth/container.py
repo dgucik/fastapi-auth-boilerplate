@@ -27,11 +27,18 @@ from auth.application.commands.reset_password import (
     ResetPasswordCommand,
     ResetPasswordHandler,
 )
+from auth.application.commands.send_mail import SendMailCommand, SendMailHandler
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
+
+# --- To dodałem ---
 from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMail,
 )
 from auth.application.events.handlers.send_verification_mail import SendVerificationMail
+from auth.application.events.publishers.account_registered import (
+    AccountRegisteredIntegrationHandler,
+)
+from auth.application.exceptions import PasswordsDoNotMatchException
 from auth.application.queries.get_account_by_id import (
     GetAccountByIdHandler,
     GetAccountByIdQuery,
@@ -55,13 +62,22 @@ from auth.infrastructure.services import (
     BcryptPasswordHasher,
     JWTTokenManager,
 )
-from shared.infrastructure.buses import CommandBus, InMemoryDomainEventBus, QueryBus
-from shared.infrastructure.event_registry import DomainEventRegistryImpl
+from shared.application.ports import IntegrationEventPublisher
+from shared.infrastructure.cqrs_buses import CommandBus, QueryBus
+from shared.infrastructure.event_messaging import (
+    DomainEventRegistryImpl,
+    InMemoryDomainEventBus,
+)
 from shared.infrastructure.exception_handler import ExceptionMetadata
 from shared.infrastructure.outbox import OutboxProcessor
 
+# --- koniec ----
+
 
 class AuthContainer(containers.DeclarativeContainer):
+    integration_event_publisher: providers.Dependency[IntegrationEventPublisher] = (
+        providers.Dependency()
+    )
     settings = providers.Configuration()
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
@@ -145,6 +161,8 @@ class AuthContainer(containers.DeclarativeContainer):
         RefreshTokenHandler, uow=uow, token_manager=token_manager
     )
 
+    send_mail_handler = providers.Factory(SendMailHandler, mail_sender=mail_sender)
+
     command_handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
@@ -155,6 +173,7 @@ class AuthContainer(containers.DeclarativeContainer):
             ResetPasswordCommand: reset_password_handler,
             ChangePasswordCommand: change_password_handler,
             RefreshTokenCommand: refresh_token_handler,
+            SendMailCommand: send_mail_handler,
         }
     )
 
@@ -183,14 +202,18 @@ class AuthContainer(containers.DeclarativeContainer):
     # --- Event Handlers ---
     send_verification_mail_handler = providers.Factory(
         SendVerificationMail,
-        mail_sender=mail_sender,
+        command_bus=command_bus,
         base_url=settings.APP_BASE_URL,
     )
 
     send_password_reset_handler = providers.Factory(
         SendPasswordResetMail,
-        mail_sender=mail_sender,
+        command_bus=command_bus,
         base_url=settings.APP_BASE_URL,
+    )
+
+    account_registered_integration_handler = providers.Factory(
+        AccountRegisteredIntegrationHandler, publisher=integration_event_publisher
     )
 
     # --- Event Bus Subscribers Registration ---
@@ -202,6 +225,9 @@ class AuthContainer(containers.DeclarativeContainer):
                 ),
                 PasswordResetRequestedDomainEvent: providers.List(
                     send_password_reset_handler.provider
+                ),
+                AccountRegisteredDomainEvent: providers.List(
+                    account_registered_integration_handler.provider
                 ),
             }
         )
@@ -222,7 +248,10 @@ class AuthContainer(containers.DeclarativeContainer):
         {
             InvalidPasswordException: ExceptionMetadata(
                 status.HTTP_401_UNAUTHORIZED, "invalid_password"
-            )
+            ),
+            PasswordsDoNotMatchException: ExceptionMetadata(
+                status.HTTP_400_BAD_REQUEST, "password_do_not_match"
+            ),
         }
     )
 
