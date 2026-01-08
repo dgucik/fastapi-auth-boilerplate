@@ -57,11 +57,9 @@ from auth.domain.services.account_registration import AccountRegistrationService
 from auth.infrastructure.auth_module_api import AuthModuleApi
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.uow import SqlAlchemyUnitOfWork
-from auth.infrastructure.services import (
-    AioSmtpMailSender,
-    BcryptPasswordHasher,
-    JWTTokenManager,
-)
+from auth.infrastructure.services.mail_sender import AioSmtpMailSender
+from auth.infrastructure.services.password_hasher import BcryptPasswordHasher
+from auth.infrastructure.services.token_manager import JWTTokenManager
 from shared.application.ports import IntegrationEventPublisher
 from shared.infrastructure.cqrs_buses import CommandBus, QueryBus
 from shared.infrastructure.event_messaging import (
