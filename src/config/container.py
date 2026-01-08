@@ -18,16 +18,16 @@ from shared.domain.exceptions import (
     EntityNotFoundException,
     ValidationException,
 )
-from shared.infrastructure.exceptions.exception_handler import (
+from shared.infrastructure.exceptions.exception_handler import GlobalExceptionHandler
+from shared.infrastructure.exceptions.exception_registry import (
     ExceptionMetadata,
     ExceptionRegistry,
-    GlobalExceptionHandler,
 )
 from shared.infrastructure.exceptions.exceptions import (
     DatabaseConnectionException,
     ExternalServiceException,
 )
-from shared.infrastructure.messaging.event_messaging import (
+from shared.infrastructure.messaging.event_publisher import (
     KafkaIntegrationEventPublisher,
 )
 

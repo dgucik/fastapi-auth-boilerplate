@@ -64,11 +64,9 @@ from auth.infrastructure.services.password_hasher import BcryptPasswordHasher
 from auth.infrastructure.services.token_manager import JWTTokenManager
 from shared.application.ports import IntegrationEventPublisher
 from shared.infrastructure.cqrs.buses import CommandBus, QueryBus
-from shared.infrastructure.exceptions.exception_handler import ExceptionMetadata
-from shared.infrastructure.messaging.event_messaging import (
-    DomainEventRegistryImpl,
-    InMemoryDomainEventBus,
-)
+from shared.infrastructure.exceptions.exception_registry import ExceptionMetadata
+from shared.infrastructure.messaging.event_bus import InMemoryDomainEventBus
+from shared.infrastructure.messaging.event_registry import DomainEventRegistryImpl
 from shared.infrastructure.outbox.outbox import OutboxProcessor
 
 
