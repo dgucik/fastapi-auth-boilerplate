@@ -37,3 +37,10 @@ class ConsumerNotStartedException(InfrastructureException):
 
     def __init__(self, message: str = "Consumer not started."):
         super().__init__(message)
+
+
+class ProducerNotStartedException(InfrastructureException):
+    """Exception for producer not started."""
+
+    def __init__(self, message: str = "Producer not started."):
+        super().__init__(message)

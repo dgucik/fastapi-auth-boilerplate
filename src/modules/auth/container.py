@@ -30,6 +30,7 @@ from auth.application.commands.send_mail import SendMailCommand, SendMailHandler
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
 
 # --- To dodałem ---
+from auth.application.events.consumers.account_registered import AccountRegistered
 from auth.application.events.handlers.send_password_reset_mail import (
     SendPasswordResetMailHandler,
 )
@@ -48,6 +49,7 @@ from auth.application.queries.get_account_by_token import (
     GetAccountByTokenHandler,
     GetAccountByTokenQuery,
 )
+from auth.contracts.events.account_registered import AccountRegisteredIntegrationEvent
 from auth.domain.events.account_registered import AccountRegisteredDomainEvent
 from auth.domain.events.password_reset_requested import (
     PasswordResetRequestedDomainEvent,
@@ -62,16 +64,17 @@ from auth.infrastructure.module_adapter import AuthModuleAdapter
 from auth.infrastructure.services.mail_sender import AioSmtpMailSender
 from auth.infrastructure.services.password_hasher import BcryptPasswordHasher
 from auth.infrastructure.services.token_manager import JWTTokenManager
-from shared.application.ports import IntegrationEventPublisher
+from shared.application.ports import IntegrationEventProducer
 from shared.infrastructure.cqrs.buses import CommandBus, QueryBus
 from shared.infrastructure.exceptions.exception_registry import ExceptionMetadata
 from shared.infrastructure.messaging.event_bus import InMemoryDomainEventBus
+from shared.infrastructure.messaging.event_consumer import KafkaIntegrationEventConsumer
 from shared.infrastructure.messaging.event_registry import DomainEventRegistryImpl
 from shared.infrastructure.outbox.processor import OutboxProcessor
 
 
 class AuthContainer(containers.DeclarativeContainer):
-    integration_event_publisher: providers.Dependency[IntegrationEventPublisher] = (
+    integration_event_publisher: providers.Dependency[IntegrationEventProducer] = (
         providers.Dependency()
     )
     settings = providers.Configuration()
@@ -253,3 +256,23 @@ class AuthContainer(containers.DeclarativeContainer):
 
     # --- Module Contract ---
     auth_module_adapter = providers.Factory(AuthModuleAdapter, query_bus=query_bus)
+
+    # --- Kafka Consumer ---
+    account_registered_handler = providers.Factory(AccountRegistered)
+
+    integration_event_map = providers.Dict(
+        {
+            "AccountRegisteredIntegrationEvent": (
+                AccountRegisteredIntegrationEvent,
+                account_registered_handler,
+            )
+        }
+    )
+
+    kafka_consumer = providers.Singleton(
+        KafkaIntegrationEventConsumer,
+        bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS,
+        group_id="auth_consumer_group",
+        topics=providers.List("account.registered"),
+        event_map=integration_event_map,
+    )

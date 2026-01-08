@@ -1,7 +1,6 @@
 from collections.abc import Callable
 from typing import Any
 
-from aiokafka import AIOKafkaProducer
 from dependency_injector import containers, providers
 from starlette import status
 
@@ -27,8 +26,8 @@ from shared.infrastructure.exceptions.exceptions import (
     DatabaseConnectionException,
     ExternalServiceException,
 )
-from shared.infrastructure.messaging.event_publisher import (
-    KafkaIntegrationEventPublisher,
+from shared.infrastructure.messaging.event_producer import (
+    KafkaIntegrationEventProducer,
 )
 
 
@@ -74,12 +73,10 @@ class AppContainer(containers.DeclarativeContainer):
     )
 
     # --- Integration Events Publisher ----
-    kafka_producer = providers.Singleton(
-        AIOKafkaProducer, bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS
-    )
 
-    kafka_integration_event_publisher = providers.Factory(
-        KafkaIntegrationEventPublisher, producer=kafka_producer
+    kafka_producer = providers.Singleton(
+        KafkaIntegrationEventProducer,
+        bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS,
     )
 
     # --- Module Containers ---
@@ -87,7 +84,7 @@ class AppContainer(containers.DeclarativeContainer):
         AuthContainer,
         settings=settings,
         session_factory=session_factory,
-        integration_event_publisher=kafka_integration_event_publisher,
+        integration_event_publisher=kafka_producer,
     )
 
     # --- Exception Handling ---

@@ -22,7 +22,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     kafka_producer = container.kafka_producer()
     await kafka_producer.start()
-    logger.info("Kafka producer started.")
+
+    auth_consumer = container.auth().kafka_consumer()
+    await auth_consumer.start()
+    auth_consumer_task = asyncio.create_task(auth_consumer.run_forever())
 
     outbox_tasks = []
 
@@ -45,7 +48,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await asyncio.gather(*outbox_tasks, return_exceptions=True)
 
     await kafka_producer.stop()
-    logger.info("Kafka producer stopped.")
+
+    auth_consumer_task.cancel()
+    await auth_consumer.stop()
 
     await close_db_connection()
     logger.info("Application shutdown complete")

@@ -4,7 +4,7 @@ from auth.contracts.events.account_registered import AccountRegisteredIntegratio
 from auth.domain.events.account_registered import AccountRegisteredDomainEvent
 from shared.application.ports import (
     DomainEventHandler,
-    IntegrationEventPublisher,
+    IntegrationEventProducer,
 )
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class AccountRegisteredIntegrationHandler(
     DomainEventHandler[AccountRegisteredDomainEvent]
 ):
-    def __init__(self, publisher: IntegrationEventPublisher):
+    def __init__(self, publisher: IntegrationEventProducer):
         self._publisher = publisher
 
     async def handle(self, event: AccountRegisteredDomainEvent) -> None:
