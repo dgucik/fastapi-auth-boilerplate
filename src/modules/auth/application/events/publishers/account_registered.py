@@ -1,6 +1,6 @@
 import logging
 
-from auth.contracts.integration_events import AccountRegisteredIntegrationEvent
+from auth.contracts.events.account_registered import AccountRegisteredIntegrationEvent
 from auth.domain.events.account_registered import AccountRegisteredDomainEvent
 from shared.application.ports import (
     DomainEventHandler,
