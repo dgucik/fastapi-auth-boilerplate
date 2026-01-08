@@ -16,7 +16,7 @@ from shared.application.ports import (
     IntegrationEventPublisher,
 )
 from shared.domain.events import DomainEvent
-from shared.infrastructure.exceptions import ConsumerNotStartedException
+from shared.infrastructure.exceptions.exceptions import ConsumerNotStartedException
 
 logger = logging.getLogger(__name__)
 

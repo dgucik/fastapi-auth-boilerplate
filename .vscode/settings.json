@@ -1,0 +1,6 @@
+{
+    "github.copilot.inlineSuggest.enable": true,
+    "github.copilot.experimentalSuggestEnabled": true,
+    "editor.inlineCompletionsAccessibilityVerbose": true
+
+}

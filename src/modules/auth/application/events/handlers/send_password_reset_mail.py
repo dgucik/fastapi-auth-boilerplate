@@ -3,7 +3,7 @@ from auth.domain.events.password_reset_requested import (
     PasswordResetRequestedDomainEvent,
 )
 from shared.application.ports import DomainEventHandler
-from shared.infrastructure.cqrs_buses import CommandBus
+from shared.infrastructure.cqrs.buses import CommandBus
 
 
 class SendPasswordResetMailHandler(

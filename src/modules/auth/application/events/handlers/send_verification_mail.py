@@ -1,7 +1,7 @@
 from auth.application.commands.send_mail import SendMailCommand
 from auth.domain.events.verification_requested import VerificationRequestedDomainEvent
 from shared.application.ports import DomainEventHandler
-from shared.infrastructure.cqrs_buses import CommandBus
+from shared.infrastructure.cqrs.buses import CommandBus
 
 
 class SendVerificationMailHandler(DomainEventHandler[VerificationRequestedDomainEvent]):

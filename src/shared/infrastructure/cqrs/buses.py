@@ -7,7 +7,7 @@ from shared.application.ports import (
     Handler,
     Query,
 )
-from shared.infrastructure.exceptions import BusException
+from shared.infrastructure.exceptions.exceptions import BusException
 
 logger = logging.getLogger(__name__)
 

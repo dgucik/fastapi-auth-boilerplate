@@ -63,13 +63,13 @@ from auth.infrastructure.services.mail_sender import AioSmtpMailSender
 from auth.infrastructure.services.password_hasher import BcryptPasswordHasher
 from auth.infrastructure.services.token_manager import JWTTokenManager
 from shared.application.ports import IntegrationEventPublisher
-from shared.infrastructure.cqrs_buses import CommandBus, QueryBus
-from shared.infrastructure.event_messaging import (
+from shared.infrastructure.cqrs.buses import CommandBus, QueryBus
+from shared.infrastructure.exceptions.exception_handler import ExceptionMetadata
+from shared.infrastructure.messaging.event_messaging import (
     DomainEventRegistryImpl,
     InMemoryDomainEventBus,
 )
-from shared.infrastructure.exception_handler import ExceptionMetadata
-from shared.infrastructure.outbox import OutboxProcessor
+from shared.infrastructure.outbox.outbox import OutboxProcessor
 
 
 class AuthContainer(containers.DeclarativeContainer):
