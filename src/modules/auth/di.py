@@ -74,7 +74,7 @@ from shared.infrastructure.outbox.processor import OutboxProcessor
 
 
 class AuthContainer(containers.DeclarativeContainer):
-    integration_event_publisher: providers.Dependency[IntegrationEventProducer] = (
+    integration_event_producer: providers.Dependency[IntegrationEventProducer] = (
         providers.Dependency()
     )
     settings = providers.Configuration()
@@ -212,7 +212,7 @@ class AuthContainer(containers.DeclarativeContainer):
     )
 
     account_registered_integration_handler = providers.Factory(
-        AccountRegisteredIntegrationHandler, publisher=integration_event_publisher
+        AccountRegisteredIntegrationHandler, publisher=integration_event_producer
     )
 
     # --- Event Bus Subscribers Registration ---

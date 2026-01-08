@@ -3,11 +3,11 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from di import AppContainer
 from fastapi import FastAPI
 from middlewares import db_session_middleware, logging_middleware, request_id_middleware
 
 from auth import auth_router, auth_routes
-from config.container import AppContainer
 from config.database import close_db_connection, scoped_session_factory
 from config.env import settings
 from config.logging import setup_logging
@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting application...")
     container: AppContainer = app.state.container
 
-    kafka_producer = container.kafka_producer()
+    kafka_producer = container.event_producer()
     await kafka_producer.start()
 
     auth_consumer = container.auth().kafka_consumer()
@@ -77,7 +77,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix="/v1/auth")
 
     # -- Exception Handlers ---
-    exc_handler = app_container.exception_handler()
+    exc_handler = app_container.exc_handler()
     app.add_exception_handler(Exception, exc_handler)
 
     return app

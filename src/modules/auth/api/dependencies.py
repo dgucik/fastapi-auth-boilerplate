@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from auth.application.uow import AuthUnitOfWork
-from auth.container import AuthContainer
+from auth.di import AuthContainer
 from auth.domain.entities.account import Account
 from auth.domain.ports import TokenManager, TokenScope
 
