@@ -4,7 +4,6 @@ from typing import Any
 from dependency_injector import containers, providers
 from starlette import status
 
-from auth.application.auth_module_api import AuthModuleApi
 from auth.application.commands.change_password import (
     ChangePasswordCommand,
     ChangePasswordHandler,
@@ -55,6 +54,7 @@ from auth.domain.events import (
 from auth.domain.exceptions import InvalidPasswordException
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
+from auth.infrastructure.auth_module_api import AuthModuleApi
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.uow import SqlAlchemyUnitOfWork
 from auth.infrastructure.services import (

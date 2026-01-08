@@ -14,7 +14,8 @@ from auth.domain.exceptions import (
     InvalidPasswordException,
 )
 from auth.domain.interfaces import PasswordHasher
-from auth.domain.value_objects import Email, PlainPassword
+from auth.domain.value_objects.email import Email
+from auth.domain.value_objects.plain_password import PlainPassword
 from shared.domain.primitives import AggregateRoot
 
 

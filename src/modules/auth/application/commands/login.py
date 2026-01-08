@@ -3,7 +3,8 @@ from dataclasses import dataclass
 
 from auth.application.uow import AuthUnitOfWork
 from auth.domain.services.account_authentication import AccountAuthenticationService
-from auth.domain.value_objects import Email, PlainPassword
+from auth.domain.value_objects.email import Email
+from auth.domain.value_objects.plain_password import PlainPassword
 from shared.application.ports import Command, Dto, Handler
 
 logger = logging.getLogger(__name__)

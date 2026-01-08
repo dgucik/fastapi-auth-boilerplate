@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
-from auth.domain.value_objects import Email
+from auth.domain.value_objects.email import Email
 from shared.domain.events import DomainEvent
 
 

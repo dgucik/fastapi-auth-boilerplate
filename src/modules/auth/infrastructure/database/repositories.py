@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth.domain.entities.account import Account
 from auth.domain.repositories import AccountRepository
-from auth.domain.value_objects import Email
+from auth.domain.value_objects.email import Email
 from auth.infrastructure.database.models import AccountModel
 from shared.infrastructure.base_repository import BaseSqlAlchemyRepository
 
