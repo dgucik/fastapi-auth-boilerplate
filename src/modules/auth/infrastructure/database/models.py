@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from config.database import Base
-from shared.infrastructure.outbox.outbox import OutboxMixin
+from shared.infrastructure.outbox.mixin import OutboxMixin
 
 
 class AccountModel(Base):
