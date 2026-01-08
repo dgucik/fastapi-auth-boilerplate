@@ -46,11 +46,11 @@ from auth.application.queries.get_account_by_token import (
     GetAccountByTokenHandler,
     GetAccountByTokenQuery,
 )
-from auth.domain.events import (
-    AccountRegisteredDomainEvent,
+from auth.domain.events.account_registered import AccountRegisteredDomainEvent
+from auth.domain.events.password_reset_requested import (
     PasswordResetRequestedDomainEvent,
-    VerificationRequestedDomainEvent,
 )
+from auth.domain.events.verification_requested import VerificationRequestedDomainEvent
 from auth.domain.exceptions import InvalidPasswordException
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService

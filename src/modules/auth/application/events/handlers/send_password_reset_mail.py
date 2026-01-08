@@ -1,5 +1,7 @@
 from auth.application.commands.send_mail import SendMailCommand
-from auth.domain.events import PasswordResetRequestedDomainEvent
+from auth.domain.events.password_reset_requested import (
+    PasswordResetRequestedDomainEvent,
+)
 from shared.application.ports import DomainEventHandler
 from shared.infrastructure.cqrs_buses import CommandBus
 

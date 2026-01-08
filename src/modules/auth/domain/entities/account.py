@@ -1,13 +1,15 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from auth.domain.events import (
-    AccountRegisteredDomainEvent,
-    PasswordChangedDomainEvent,
+from auth.domain.events.account_registered import AccountRegisteredDomainEvent
+from auth.domain.events.password_changed import PasswordChangedDomainEvent
+from auth.domain.events.password_reset_completed import (
     PasswordResetCompletedDomainEvent,
-    PasswordResetRequestedDomainEvent,
-    VerificationRequestedDomainEvent,
 )
+from auth.domain.events.password_reset_requested import (
+    PasswordResetRequestedDomainEvent,
+)
+from auth.domain.events.verification_requested import VerificationRequestedDomainEvent
 from auth.domain.exceptions import (
     AccountAlreadyVerifiedException,
     AccountNotVerifiedException,
