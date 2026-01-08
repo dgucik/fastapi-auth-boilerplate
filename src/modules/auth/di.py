@@ -30,15 +30,15 @@ from auth.application.commands.send_mail import SendMailCommand, SendMailHandler
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
 
 # --- To dodałem ---
-from auth.application.events.consumers.account_registered import AccountRegistered
-from auth.application.events.handlers.send_password_reset_mail import (
+from auth.application.events.external.account_registered import AccountRegisteredHandler
+from auth.application.events.integration.account_registered import (
+    AccountRegisteredIntegrationHandler,
+)
+from auth.application.events.internal.send_password_reset_mail import (
     SendPasswordResetMailHandler,
 )
-from auth.application.events.handlers.send_verification_mail import (
+from auth.application.events.internal.send_verification_mail import (
     SendVerificationMailHandler,
-)
-from auth.application.events.publishers.account_registered import (
-    AccountRegisteredIntegrationHandler,
 )
 from auth.application.exceptions import PasswordsDoNotMatchException
 from auth.application.queries.get_account_by_id import (
@@ -49,6 +49,7 @@ from auth.application.queries.get_account_by_token import (
     GetAccountByTokenHandler,
     GetAccountByTokenQuery,
 )
+from auth.application.uow import AuthUnitOfWork
 from auth.contracts.events.account_registered import AccountRegisteredIntegrationEvent
 from auth.domain.events.account_registered import AccountRegisteredDomainEvent
 from auth.domain.events.password_reset_requested import (
@@ -64,7 +65,11 @@ from auth.infrastructure.module_adapter import AuthModuleAdapter
 from auth.infrastructure.services.mail_sender import AioSmtpMailSender
 from auth.infrastructure.services.password_hasher import BcryptPasswordHasher
 from auth.infrastructure.services.token_manager import JWTTokenManager
-from shared.application.ports import IntegrationEventProducer
+from shared.application.ports import (
+    DomainEventBus,
+    DomainEventRegistry,
+    IntegrationEventProducer,
+)
 from shared.infrastructure.cqrs.buses import CommandBus, QueryBus
 from shared.infrastructure.exceptions.exception_registry import ExceptionMetadata
 from shared.infrastructure.messaging.event_bus import InMemoryDomainEventBus
@@ -72,35 +77,19 @@ from shared.infrastructure.messaging.event_consumer import KafkaIntegrationEvent
 from shared.infrastructure.messaging.event_registry import DomainEventRegistryImpl
 from shared.infrastructure.outbox.processor import OutboxProcessor
 
+AUTH_EXCPETION_MAPPINGS = {
+    InvalidPasswordException: ExceptionMetadata(
+        status.HTTP_401_UNAUTHORIZED, "invalid_password"
+    ),
+    PasswordsDoNotMatchException: ExceptionMetadata(
+        status.HTTP_400_BAD_REQUEST, "password_do_not_match"
+    ),
+}
 
-class AuthContainer(containers.DeclarativeContainer):
-    integration_event_producer: providers.Dependency[IntegrationEventProducer] = (
-        providers.Dependency()
-    )
+
+class InfraServicesContainer(containers.DeclarativeContainer):
     settings = providers.Configuration()
-    session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
-    # --- Event Bus & Event Registry ---
-    domain_event_bus = providers.Singleton(InMemoryDomainEventBus)
-
-    domain_event_registry = providers.Singleton(
-        DomainEventRegistryImpl,
-        events=[
-            VerificationRequestedDomainEvent,
-            AccountRegisteredDomainEvent,
-            PasswordResetRequestedDomainEvent,
-        ],
-    )
-
-    # --- Unit of Work ---
-    uow = providers.Factory(
-        SqlAlchemyUnitOfWork,
-        session_factory=session_factory,
-        event_bus=domain_event_bus,
-        event_registry=domain_event_registry,
-    )
-
-    # --- Infra Services ---
     hasher = providers.Singleton(BcryptPasswordHasher)
 
     token_manager = providers.Singleton(
@@ -115,54 +104,85 @@ class AuthContainer(containers.DeclarativeContainer):
 
     mail_sender = providers.Singleton(AioSmtpMailSender, config=settings.mail)
 
-    # --- Domain Services ---
+
+class DomainServicesContainer(containers.DeclarativeContainer):
+    infra_services = providers.DependenciesContainer()
+
     account_registration_service = providers.Factory(
-        AccountRegistrationService, hasher=hasher
+        AccountRegistrationService, hasher=infra_services.hasher
     )
 
     account_authentication_service = providers.Factory(
-        AccountAuthenticationService, hasher=hasher, token_manager=token_manager
+        AccountAuthenticationService,
+        hasher=infra_services.hasher,
+        token_manager=infra_services.token_manager,
     )
 
-    # --- Commands & Handlers ---
+
+class CommandHandlersContainer(containers.DeclarativeContainer):
+    """
+    Command handlers container.
+
+    To add a new command:
+    1. Import the command and handler in the imports section
+    2. Add the handler factory here
+    3. Add to handlers dict
+    """
+
+    # --- Dependencies ---
+    uow: providers.Dependency[AuthUnitOfWork] = providers.Dependency()
+    settings = providers.Configuration()
+
+    infra_services = providers.DependenciesContainer()
+    domain_services = providers.DependenciesContainer()
+
+    # --- Handler Factories ---
     register_handler = providers.Factory(
         RegisterHandler,
         uow=uow,
-        service=account_registration_service,
-        token_manager=token_manager,
+        service=domain_services.account_registration_service,
+        token_manager=infra_services.token_manager,
     )
 
     login_handler = providers.Factory(
-        LoginHandler, uow=uow, service=account_authentication_service
+        LoginHandler, uow=uow, service=domain_services.account_authentication_service
     )
 
     request_verification_token_handler = providers.Factory(
-        RequestVerificationTokenHandler, uow=uow, token_manager=token_manager
+        RequestVerificationTokenHandler,
+        uow=uow,
+        token_manager=infra_services.token_manager,
     )
 
     verify_email_handler = providers.Factory(
-        VerifyEmailHandler, uow=uow, token_manager=token_manager
+        VerifyEmailHandler, uow=uow, token_manager=infra_services.token_manager
     )
 
     request_password_reset_handler = providers.Factory(
-        RequestPasswordResetHandler, uow=uow, token_manager=token_manager
+        RequestPasswordResetHandler, uow=uow, token_manager=infra_services.token_manager
     )
 
     reset_password_handler = providers.Factory(
-        ResetPasswordHandler, uow=uow, token_manager=token_manager, hasher=hasher
+        ResetPasswordHandler,
+        uow=uow,
+        token_manager=infra_services.token_manager,
+        hasher=infra_services.hasher,
     )
 
     change_password_handler = providers.Factory(
-        ChangePasswordHandler, uow=uow, hasher=hasher
+        ChangePasswordHandler, uow=uow, hasher=infra_services.hasher
     )
 
     refresh_token_handler = providers.Factory(
-        RefreshTokenHandler, uow=uow, token_manager=token_manager
+        RefreshTokenHandler, uow=uow, token_manager=infra_services.token_manager
     )
 
-    send_mail_handler = providers.Factory(SendMailHandler, mail_sender=mail_sender)
+    send_mail_handler = providers.Factory(
+        SendMailHandler, mail_sender=infra_services.mail_sender
+    )
 
-    command_handlers = providers.Dict(
+    # --- Handlers Map ---
+    handlers = providers.Dict(
         {
             RegisterCommand: register_handler,
             LoginCommand: login_handler,
@@ -176,12 +196,28 @@ class AuthContainer(containers.DeclarativeContainer):
         }
     )
 
-    # -- Command Bus ---
-    command_bus = providers.Factory(CommandBus, handlers=command_handlers)
+    # -- Bus ---
+    bus = providers.Factory(CommandBus, handlers=handlers)
 
-    # --- Queries & Handlers ---
+
+class QueryHandlersContainer(containers.DeclarativeContainer):
+    """
+    Query handlers container.
+
+    To add a new query:
+    1. Import the query and handler in the imports section
+    2. Add the handler factory here
+    3. Add to handlers dict
+    """
+
+    # --- Dependencies ---
+    uow: providers.Dependency[AuthUnitOfWork] = providers.Dependency()
+
+    infra_services = providers.DependenciesContainer()
+
+    # --- Handlers Factories ---
     get_account_by_token_handler = providers.Factory(
-        GetAccountByTokenHandler, uow=uow, token_manager=token_manager
+        GetAccountByTokenHandler, uow=uow, token_manager=infra_services.token_manager
     )
 
     get_account_by_id_handler = providers.Factory(
@@ -189,16 +225,35 @@ class AuthContainer(containers.DeclarativeContainer):
         uow=uow,
     )
 
-    query_handlers = providers.Dict(
+    # --- Handlers Map ---
+    handlers = providers.Dict(
         {
             GetAccountByTokenQuery: get_account_by_token_handler,
             GetAccountByIdQuery: get_account_by_id_handler,
         }
     )
-    # --- Query Bus ---
-    query_bus = providers.Factory(QueryBus, handlers=query_handlers)
 
-    # --- Event Handlers ---
+    # --- Bus ---
+    bus = providers.Factory(QueryBus, handlers=handlers)
+
+
+class DomainEventHandlersContainer(containers.DeclarativeContainer):
+    """
+    Domain Event handlers container
+
+    To add a new event:
+    1. Import the event and handler in the imports section
+    2. Add the handler factory here
+    3. Add to handlers dict
+    4. Add to registry
+    """
+
+    # --- Dependencies ---
+    settings = providers.Configuration()
+    command_bus: providers.Dependency[CommandBus] = providers.Dependency()
+    producer: providers.Dependency[IntegrationEventProducer] = providers.Dependency()
+
+    # --- Event Factories ---
     send_verification_mail_handler = providers.Factory(
         SendVerificationMailHandler,
         command_bus=command_bus,
@@ -212,55 +267,56 @@ class AuthContainer(containers.DeclarativeContainer):
     )
 
     account_registered_integration_handler = providers.Factory(
-        AccountRegisteredIntegrationHandler, publisher=integration_event_producer
+        AccountRegisteredIntegrationHandler, producer=producer
     )
 
-    # --- Event Bus Subscribers Registration ---
-    domain_event_bus.add_kwargs(
-        subscribers=providers.Dict(
-            {
-                VerificationRequestedDomainEvent: providers.List(
-                    send_verification_mail_handler.provider
-                ),
-                PasswordResetRequestedDomainEvent: providers.List(
-                    send_password_reset_handler.provider
-                ),
-                AccountRegisteredDomainEvent: providers.List(
-                    account_registered_integration_handler.provider
-                ),
-            }
-        )
-    )
-
-    # --- Outbox processor ---
-    outbox_processor = providers.Singleton(
-        OutboxProcessor,
-        session_factory=session_factory,
-        event_bus=domain_event_bus,
-        registry=domain_event_registry,
-        outbox_model=providers.Object(AuthOutboxEvent),
-        batch_size=20,
-    )
-
-    # --- Exception Mappings ---
-    exception_mappings = providers.Dict(
+    # --- Handlers Map ---
+    handlers = providers.Dict(
         {
-            InvalidPasswordException: ExceptionMetadata(
-                status.HTTP_401_UNAUTHORIZED, "invalid_password"
+            VerificationRequestedDomainEvent: providers.List(
+                send_verification_mail_handler.provider
             ),
-            PasswordsDoNotMatchException: ExceptionMetadata(
-                status.HTTP_400_BAD_REQUEST, "password_do_not_match"
+            PasswordResetRequestedDomainEvent: providers.List(
+                send_password_reset_handler.provider
+            ),
+            AccountRegisteredDomainEvent: providers.List(
+                account_registered_integration_handler.provider
             ),
         }
     )
 
-    # --- Module Contract ---
-    auth_module_adapter = providers.Factory(AuthModuleAdapter, query_bus=query_bus)
+    # --- Bus ---
+    bus = providers.Singleton(InMemoryDomainEventBus, subscribers=handlers)
 
-    # --- Kafka Consumer ---
-    account_registered_handler = providers.Factory(AccountRegistered)
+    # --- Registry ---
+    registry = providers.Singleton(
+        DomainEventRegistryImpl,
+        events=[
+            VerificationRequestedDomainEvent,
+            AccountRegisteredDomainEvent,
+            PasswordResetRequestedDomainEvent,
+        ],
+    )
 
-    integration_event_map = providers.Dict(
+
+class IntegrationEventHandlersContainer(containers.DeclarativeContainer):
+    """
+    Integration Event handlers container
+
+    To add a new event:
+    1. Import the event and handler in the imports section
+    2. Add the handler factory here
+    3. Add to handlers dict
+    """
+
+    # --- Dependencies ---
+    settings = providers.Configuration()
+
+    # --- Event Factories ---
+    account_registered_handler = providers.Factory(AccountRegisteredHandler)
+
+    # --- Handlers Map ---
+    event_map = providers.Dict(
         {
             "AccountRegisteredIntegrationEvent": (
                 AccountRegisteredIntegrationEvent,
@@ -269,10 +325,81 @@ class AuthContainer(containers.DeclarativeContainer):
         }
     )
 
-    kafka_consumer = providers.Singleton(
+    # --- Event Consumer ---
+    consumer = providers.Singleton(
         KafkaIntegrationEventConsumer,
         bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS,
         group_id="auth_consumer_group",
         topics=providers.List("account.registered"),
-        event_map=integration_event_map,
+        event_map=event_map,
     )
+
+
+class AuthContainer(containers.DeclarativeContainer):
+    # --- Dependencies ---
+    event_producer: providers.Dependency[IntegrationEventProducer] = (
+        providers.Dependency()
+    )
+    settings = providers.Configuration()
+    session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
+
+    # --- Placeholders ----
+    event_bus: providers.Dependency[DomainEventBus] = providers.Dependency()
+    event_registry: providers.Dependency[DomainEventRegistry] = providers.Dependency()
+
+    # --- Unit of Work ---
+    uow = providers.Factory(
+        SqlAlchemyUnitOfWork,
+        session_factory=session_factory,
+        event_bus=event_bus,
+        event_registry=event_registry,
+    )
+
+    outbox_processor = providers.Singleton(
+        OutboxProcessor,
+        session_factory=session_factory,
+        event_bus=event_bus,
+        event_registry=event_registry,
+        outbox_model=providers.Object(AuthOutboxEvent),
+        batch_size=20,
+    )
+
+    # --- Sub-Containers ---
+    infra_services = providers.Container(InfraServicesContainer, settings=settings)
+    domain_services = providers.Container(
+        DomainServicesContainer, infra_services=infra_services
+    )
+    command_handlers = providers.Container(
+        CommandHandlersContainer,
+        uow=uow,
+        settings=settings,
+        infra_services=infra_services,
+        domain_services=domain_services,
+    )
+    query_handlers = providers.Container(
+        QueryHandlersContainer, uow=uow, infra_services=infra_services
+    )
+    domain_event_handlers = providers.Container(
+        DomainEventHandlersContainer,
+        settings=settings,
+        command_bus=command_handlers.bus,
+        producer=event_producer,
+    )
+    integration_event_handlers = providers.Container(
+        IntegrationEventHandlersContainer, settings=settings
+    )
+
+    # --- Module Contract ---
+    auth_module_adapter = providers.Factory(
+        AuthModuleAdapter, query_bus=query_handlers.bus
+    )
+
+    # --- Overrides ---
+    event_bus.override(domain_event_handlers.bus)
+    event_registry.override(domain_event_handlers.registry)
+
+    # --- Convenience aliases ---
+    command_bus = command_handlers.bus
+    query_bus = query_handlers.bus
+    token_manager = infra_services.token_manager
+    event_consumer = integration_event_handlers.consumer

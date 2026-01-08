@@ -18,13 +18,13 @@ class OutboxProcessor:
         self,
         session_factory: async_sessionmaker[AsyncSession],
         event_bus: DomainEventBus,
-        registry: DomainEventRegistry,
+        event_registry: DomainEventRegistry,
         outbox_model: type[OutboxMixin],
         batch_size: int = 20,
     ):
         self._session_factory = session_factory
         self._event_bus = event_bus
-        self._registry = registry
+        self._event_registry = event_registry
         self._outbox_model = outbox_model
         self._batch_size = batch_size
 
@@ -48,7 +48,7 @@ class OutboxProcessor:
             processed_count = 0
             for record in records:
                 try:
-                    event_cls = self._registry.get_class(record.event_type)
+                    event_cls = self._event_registry.get_class(record.event_type)
                     event = event_cls.from_dict(record.payload)
 
                     await self._event_bus.publish(event)

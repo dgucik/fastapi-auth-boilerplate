@@ -40,7 +40,7 @@ router = APIRouter(tags=["Auth"])
 @inject
 async def register(
     request: RegisterRequest,
-    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_handlers.bus]),
 ) -> RegisterResponse:
     cmd = RegisterCommand(
         email=request.email,

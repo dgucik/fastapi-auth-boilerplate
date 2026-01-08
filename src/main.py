@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     kafka_producer = container.event_producer()
     await kafka_producer.start()
 
-    auth_consumer = container.auth().kafka_consumer()
+    auth_consumer = container.auth().event_consumer()
     await auth_consumer.start()
     auth_consumer_task = asyncio.create_task(auth_consumer.run_forever())
 
