@@ -3,7 +3,7 @@ from typing import Final
 
 from passlib.context import CryptContext
 
-from auth.domain.interfaces import (
+from auth.domain.ports import (
     PasswordHasher,
 )
 

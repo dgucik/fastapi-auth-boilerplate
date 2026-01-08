@@ -6,7 +6,7 @@ from typing import Any
 import aiosmtplib
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from auth.domain.interfaces import (
+from auth.domain.ports import (
     MailSender,
 )
 from config.env import MailSettings

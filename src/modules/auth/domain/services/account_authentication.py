@@ -1,5 +1,5 @@
 from auth.domain.exceptions import InvalidPasswordException
-from auth.domain.interfaces import AuthenticationResult, PasswordHasher, TokenManager
+from auth.domain.ports import AuthenticationResult, PasswordHasher, TokenManager
 from auth.domain.repositories import AccountRepository
 from auth.domain.value_objects.email import Email
 from auth.domain.value_objects.plain_password import PlainPassword

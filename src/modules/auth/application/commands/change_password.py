@@ -8,7 +8,7 @@ from auth.application.exceptions import (
     PasswordsDoNotMatchException,
 )
 from auth.application.uow import AuthUnitOfWork
-from auth.domain.interfaces import PasswordHasher
+from auth.domain.ports import PasswordHasher
 from auth.domain.value_objects.plain_password import PlainPassword
 from shared.application.ports import Command, Handler
 

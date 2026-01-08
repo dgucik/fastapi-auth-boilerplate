@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from auth.application.exceptions import AccountDoesNotExistException
 from auth.application.uow import AuthUnitOfWork
-from auth.domain.interfaces import TokenManager
+from auth.domain.ports import TokenManager
 from auth.domain.value_objects.email import Email
 from shared.application.ports import Command, Handler
 

@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 from jose import ExpiredSignatureError, JWTError, jwt
 
-from auth.domain.interfaces import (
+from auth.domain.ports import (
     AuthenticationResult,
     TokenManager,
     TokenScope,

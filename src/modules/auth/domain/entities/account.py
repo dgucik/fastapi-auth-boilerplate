@@ -15,7 +15,7 @@ from auth.domain.exceptions import (
     AccountNotVerifiedException,
     InvalidPasswordException,
 )
-from auth.domain.interfaces import PasswordHasher
+from auth.domain.ports import PasswordHasher
 from auth.domain.value_objects.email import Email
 from auth.domain.value_objects.plain_password import PlainPassword
 from shared.domain.primitives import AggregateRoot

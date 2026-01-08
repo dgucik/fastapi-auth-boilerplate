@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 from auth.application.uow import AuthUnitOfWork
 from auth.container import AuthContainer
 from auth.domain.entities.account import Account
-from auth.domain.interfaces import TokenManager, TokenScope
+from auth.domain.ports import TokenManager, TokenScope
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/jwt/login")
 

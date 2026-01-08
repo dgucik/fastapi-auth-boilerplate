@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from auth.domain.interfaces import MailSender
+from auth.domain.ports import MailSender
 from shared.application.ports import Command, Handler
 
 logger = logging.getLogger(__name__)

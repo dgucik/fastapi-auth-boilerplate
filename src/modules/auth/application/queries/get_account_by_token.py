@@ -8,7 +8,7 @@ from auth.contracts.exceptions import (
     ContractInvalidTokenException,
     ContractTokenExpiredException,
 )
-from auth.domain.interfaces import TokenManager, TokenScope
+from auth.domain.ports import TokenManager, TokenScope
 from auth.infrastructure.exceptions import InvalidTokenException, TokenExpiredException
 from shared.application.ports import Handler, Query
 
