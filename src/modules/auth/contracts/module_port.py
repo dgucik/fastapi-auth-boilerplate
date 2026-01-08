@@ -4,7 +4,7 @@ from uuid import UUID
 from auth.contracts.dtos import AuthAccountDto
 
 
-class AuthModuleContract(ABC):
+class AuthModulePort(ABC):
     @abstractmethod
     async def get_account_by_token(self, token: str) -> AuthAccountDto:
         pass

@@ -6,7 +6,9 @@ from shared.application.ports import DomainEventHandler
 from shared.infrastructure.cqrs_buses import CommandBus
 
 
-class SendPasswordResetMail(DomainEventHandler[PasswordResetRequestedDomainEvent]):
+class SendPasswordResetMailHandler(
+    DomainEventHandler[PasswordResetRequestedDomainEvent]
+):
     def __init__(self, command_bus: CommandBus, base_url: str) -> None:
         self._command_bus = command_bus
         self._base_url = base_url

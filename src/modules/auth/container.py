@@ -31,9 +31,11 @@ from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHand
 
 # --- To dodałem ---
 from auth.application.events.handlers.send_password_reset_mail import (
-    SendPasswordResetMail,
+    SendPasswordResetMailHandler,
 )
-from auth.application.events.handlers.send_verification_mail import SendVerificationMail
+from auth.application.events.handlers.send_verification_mail import (
+    SendVerificationMailHandler,
+)
 from auth.application.events.publishers.account_registered import (
     AccountRegisteredIntegrationHandler,
 )
@@ -54,9 +56,9 @@ from auth.domain.events.verification_requested import VerificationRequestedDomai
 from auth.domain.exceptions import InvalidPasswordException
 from auth.domain.services.account_authentication import AccountAuthenticationService
 from auth.domain.services.account_registration import AccountRegistrationService
-from auth.infrastructure.auth_module_api import AuthModuleApi
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.uow import SqlAlchemyUnitOfWork
+from auth.infrastructure.module_adapter import AuthModuleAdapter
 from auth.infrastructure.services.mail_sender import AioSmtpMailSender
 from auth.infrastructure.services.password_hasher import BcryptPasswordHasher
 from auth.infrastructure.services.token_manager import JWTTokenManager
@@ -68,8 +70,6 @@ from shared.infrastructure.event_messaging import (
 )
 from shared.infrastructure.exception_handler import ExceptionMetadata
 from shared.infrastructure.outbox import OutboxProcessor
-
-# --- koniec ----
 
 
 class AuthContainer(containers.DeclarativeContainer):
@@ -199,13 +199,13 @@ class AuthContainer(containers.DeclarativeContainer):
 
     # --- Event Handlers ---
     send_verification_mail_handler = providers.Factory(
-        SendVerificationMail,
+        SendVerificationMailHandler,
         command_bus=command_bus,
         base_url=settings.APP_BASE_URL,
     )
 
     send_password_reset_handler = providers.Factory(
-        SendPasswordResetMail,
+        SendPasswordResetMailHandler,
         command_bus=command_bus,
         base_url=settings.APP_BASE_URL,
     )
@@ -254,4 +254,4 @@ class AuthContainer(containers.DeclarativeContainer):
     )
 
     # --- Module Contract ---
-    module_contract = providers.Factory(AuthModuleApi, query_bus=query_bus)
+    auth_module_adapter = providers.Factory(AuthModuleAdapter, query_bus=query_bus)
