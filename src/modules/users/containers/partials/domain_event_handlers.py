@@ -1,7 +1,6 @@
 from dependency_injector import containers, providers
 
 from shared.application.ports import IntegrationEventProducer
-from shared.infrastructure.cqrs.buses import CommandBus
 from shared.infrastructure.messaging.event_bus import InMemoryDomainEventBus
 from shared.infrastructure.messaging.event_registry import DomainEventRegistryImpl
 
@@ -19,7 +18,6 @@ class DomainEventHandlersContainer(containers.DeclarativeContainer):
 
     # --- Dependencies ---
     settings = providers.Configuration()
-    command_bus: providers.Dependency[CommandBus] = providers.Dependency()
     producer: providers.Dependency[IntegrationEventProducer] = providers.Dependency()
 
     # --- Event Factories ---

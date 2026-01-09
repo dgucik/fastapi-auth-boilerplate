@@ -1,5 +1,4 @@
 from dependency_injector import containers, providers
-from users.application.commands.create_user import CreateUserCommand, CreateUserHandler
 from users.application.uow import UsersUnitOfWork
 
 from shared.infrastructure.cqrs.buses import CommandBus
@@ -20,12 +19,9 @@ class CommandHandlersContainer(containers.DeclarativeContainer):
     domain_services = providers.DependenciesContainer()
 
     # --- Handler Factories ---
-    create_user_handler = providers.Factory(
-        CreateUserHandler, uow=uow, service=domain_services.user_creation_service
-    )
 
     # --- Handlers Map
-    handlers = providers.Dict({CreateUserCommand: create_user_handler})
+    handlers = providers.Dict({})
 
     # --- Bus ---
     bus = providers.Factory(CommandBus, handlers=handlers)

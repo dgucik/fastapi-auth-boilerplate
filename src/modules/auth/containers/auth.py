@@ -10,9 +10,6 @@ from auth.containers.partials.domain_event_handlers import DomainEventHandlersCo
 from auth.containers.partials.domain_services import DomainServicesContainer
 from auth.containers.partials.exception_mappings import AUTH_EXCEPTION_MAPPINGS
 from auth.containers.partials.infra_services import InfraServicesContainer
-from auth.containers.partials.integration_event_handlers import (
-    IntegrationEventHandlersContainer,
-)
 from auth.containers.partials.query_handlers import QueryHandlersContainer
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.uow import SqlAlchemyAuthUnitOfWork
@@ -97,11 +94,8 @@ class AuthContainer(containers.DeclarativeContainer):
     domain_event_handlers = providers.Container(
         DomainEventHandlersContainer,
         settings=settings,
-        command_bus=command_handlers.bus,
+        infra_services=infra_services,
         producer=event_producer,
-    )
-    integration_event_handlers = providers.Container(
-        IntegrationEventHandlersContainer, settings=settings
     )
 
     # --- Module Contract ---
@@ -117,5 +111,4 @@ class AuthContainer(containers.DeclarativeContainer):
     command_bus = command_handlers.bus
     query_bus = query_handlers.bus
     token_manager = infra_services.token_manager
-    event_consumer = integration_event_handlers.consumer
     exception_mappings = providers.Object(AUTH_EXCEPTION_MAPPINGS)

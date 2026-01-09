@@ -17,7 +17,6 @@ from auth.domain.events.verification_requested import VerificationRequestedDomai
 from shared.application.ports import (
     IntegrationEventProducer,
 )
-from shared.infrastructure.cqrs.buses import CommandBus
 from shared.infrastructure.messaging.event_bus import InMemoryDomainEventBus
 from shared.infrastructure.messaging.event_registry import DomainEventRegistryImpl
 
@@ -35,19 +34,19 @@ class DomainEventHandlersContainer(containers.DeclarativeContainer):
 
     # --- Dependencies ---
     settings = providers.Configuration()
-    command_bus: providers.Dependency[CommandBus] = providers.Dependency()
+    infra_services = providers.DependenciesContainer()
     producer: providers.Dependency[IntegrationEventProducer] = providers.Dependency()
 
     # --- Event Factories ---
     send_verification_mail_handler = providers.Factory(
         SendVerificationMailHandler,
-        command_bus=command_bus,
+        mail_sender=infra_services.mail_sender,
         base_url=settings.APP_BASE_URL,
     )
 
     send_password_reset_handler = providers.Factory(
         SendPasswordResetMailHandler,
-        command_bus=command_bus,
+        mail_sender=infra_services.mail_sender,
         base_url=settings.APP_BASE_URL,
     )
 

@@ -90,18 +90,21 @@ class UsersContainer(containers.DeclarativeContainer):
     domain_event_handlers = providers.Container(
         DomainEventHandlersContainer,
         settings=settings,
-        command_bus=command_handlers.bus,
         producer=event_producer,
     )
     integration_event_handlers = providers.Container(
         IntegrationEventHandlersContainer,
         settings=settings,
-        command_bus=command_handlers.bus,
+        domain_services=domain_services,
+        uow=uow,
     )
 
     # --- Overrides ---
     event_bus.override(domain_event_handlers.bus)
     event_registry.override(domain_event_handlers.registry)
+    command_handlers.uow.override(uow)
+    query_handlers.uow.override(uow)
+    integration_event_handlers.uow.override(uow)
 
     # --- Convenience aliases ---
     command_bus = command_handlers.bus

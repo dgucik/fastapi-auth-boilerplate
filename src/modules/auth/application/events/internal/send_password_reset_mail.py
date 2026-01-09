@@ -1,16 +1,19 @@
-from auth.application.commands.send_mail import SendMailCommand
+import logging
+
 from auth.domain.events.password_reset_requested import (
     PasswordResetRequestedDomainEvent,
 )
+from auth.domain.ports import MailSender
 from shared.application.ports import DomainEventHandler
-from shared.infrastructure.cqrs.buses import CommandBus
+
+logger = logging.getLogger(__name__)
 
 
 class SendPasswordResetMailHandler(
     DomainEventHandler[PasswordResetRequestedDomainEvent]
 ):
-    def __init__(self, command_bus: CommandBus, base_url: str) -> None:
-        self._command_bus = command_bus
+    def __init__(self, command_bus: MailSender, base_url: str) -> None:
+        self._mail_sender = command_bus
         self._base_url = base_url
 
     async def handle(self, event: PasswordResetRequestedDomainEvent) -> None:
@@ -19,11 +22,10 @@ class SendPasswordResetMailHandler(
         template_name = "reset_password_mail.html"
         context = {"reset_link": f"{self._base_url}/reset-password?token={event.token}"}
 
-        cmd = SendMailCommand(
+        await self._mail_sender.send(
             recipient=recipient,
             subject=subject,
             template_name=template_name,
             context=context,
         )
-
-        await self._command_bus.dispatch(cmd)
+        logger.info(f"Email: {subject} sent to: {recipient}.")
