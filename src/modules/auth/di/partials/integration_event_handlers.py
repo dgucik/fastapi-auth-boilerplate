@@ -4,8 +4,6 @@ from typing import Any
 
 from dependency_injector import containers, providers
 
-from auth.application.events.external.account_registered import AccountRegisteredHandler
-from auth.contracts.events.account_registered import AccountRegisteredIntegrationEvent
 from shared.application.ports import IntegrationEventHandler
 from shared.infrastructure.messaging.event_consumer import KafkaIntegrationEventConsumer
 
@@ -43,17 +41,9 @@ class IntegrationEventHandlersContainer(containers.DeclarativeContainer):
     settings = providers.Configuration()
 
     # --- Event Factories ---
-    account_registered_handler = providers.Factory(AccountRegisteredHandler)
 
     # --- Handlers Map ---
-    event_map = providers.Dict(
-        {
-            "AccountRegisteredIntegrationEvent": (
-                AccountRegisteredIntegrationEvent,
-                account_registered_handler,
-            )
-        }
-    )
+    event_map = providers.Dict({})
 
     # --- Event Consumer ---
     consumer = providers.Resource(
