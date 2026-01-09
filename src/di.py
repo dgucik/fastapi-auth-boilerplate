@@ -5,7 +5,6 @@ from dependency_injector import containers, providers
 from starlette import status
 
 from auth import AuthContainer
-from auth.di import AUTH_EXCPETION_MAPPINGS
 from shared.application.exceptions import (
     CommandHandlingException,
     EventReconstructionException,
@@ -90,7 +89,7 @@ class AppContainer(containers.DeclarativeContainer):
         ExceptionRegistry,
         mappings_list=providers.List(
             SHARED_EXCEPTION_MAPPINGS,
-            AUTH_EXCPETION_MAPPINGS,
+            auth.exception_mappings,
         ),
     )
 

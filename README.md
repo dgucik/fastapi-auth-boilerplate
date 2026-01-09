@@ -63,9 +63,9 @@ src/
 │   ├── auth/
 │   │   ├── api/                    # Routes / Controllers
 │   │   ├── application/            # Use Cases (Commands/Queries/Event Handlers)
+│   │   ├── di/                     # Module-specific DI Containers
 │   │   ├── domain/                 # Core Logic (Aggregates, Entities, Value Objects)
-│   │   ├── infrastructure/         # Implementation (Repo, Adapters)
-│   │   └── di.py                   # Module-specific DI Container
+│   │   └── infrastructure/         # Implementation (Repo, Adapters)
 │   ├── users/
 │   │   ├── api/
 │   │   ├── application/

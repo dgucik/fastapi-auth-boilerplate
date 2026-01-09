@@ -26,7 +26,7 @@ from auth.application.commands.request_verification_token import (
 from auth.application.commands.reset_password import ResetPasswordCommand
 from auth.application.commands.verify import VerifyEmailCommand
 from auth.application.exceptions import AccountDoesNotExistException
-from auth.di import AuthContainer
+from auth.di.auth import AuthContainer
 from auth.domain.entities.account import Account
 from shared.api.responses import MessageResponse
 from shared.infrastructure.cqrs.buses import CommandBus
