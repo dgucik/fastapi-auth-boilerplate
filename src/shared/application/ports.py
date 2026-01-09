@@ -49,7 +49,7 @@ class DomainEventBus(ABC):
 
 class DomainEventRegistry(ABC):
     @abstractmethod
-    def register(self, event_class: type[DomainEvent]) -> None:
+    def _register(self, event_class: type[DomainEvent]) -> None:
         pass
 
     @abstractmethod

@@ -2,9 +2,10 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from di import AppContainer
+from app_container import AppContainer
 from fastapi import FastAPI
 from middlewares import db_session_middleware, logging_middleware, request_id_middleware
+from users import users_router, users_routes
 
 from auth import auth_router, auth_routes
 from config.database import close_db_connection, scoped_session_factory
@@ -38,6 +39,7 @@ def create_app() -> FastAPI:
     app_container.settings.from_pydantic(settings)
 
     app_container.auth().wire(modules=auth_routes)
+    app_container.users().wire(modules=users_routes)
 
     app = FastAPI(lifespan=lifespan)
 
@@ -50,6 +52,7 @@ def create_app() -> FastAPI:
 
     # --- Routers ---
     app.include_router(auth_router, prefix="/v1/auth")
+    app.include_router(users_router, prefix="/v1/users")
 
     # -- Exception Handlers ---
     exc_handler = app_container.exc_handler()

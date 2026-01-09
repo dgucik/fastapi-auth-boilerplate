@@ -1,3 +1,4 @@
+import inspect
 import json
 import logging
 from collections.abc import Callable
@@ -71,9 +72,10 @@ class KafkaIntegrationEventConsumer(IntegrationEventConsumer):
 
             event_class, handler_factory = self._event_map[event_type]
             payload = json.loads(msg.value.decode("utf-8"))
-
             event_instance = event_class.from_dict(payload)
             handler = handler_factory()
+            if inspect.isawaitable(handler):
+                handler = await handler
             await handler.handle(event_instance)
 
         except Exception as e:

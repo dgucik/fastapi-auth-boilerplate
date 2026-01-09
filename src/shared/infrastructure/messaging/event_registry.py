@@ -16,9 +16,9 @@ class DomainEventRegistryImpl(DomainEventRegistry):
 
         if events:
             for event in events:
-                self.register(event)
+                self._register(event)
 
-    def register(self, event_class: type[DomainEvent]) -> None:
+    def _register(self, event_class: type[DomainEvent]) -> None:
         event_name = event_class.__name__
 
         self._name_to_cls[event_name] = event_class
