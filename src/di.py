@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
 from dependency_injector import containers, providers
@@ -11,6 +11,7 @@ from shared.application.exceptions import (
     QueryExecutionException,
     UnitOfWorkException,
 )
+from shared.application.ports import IntegrationEventProducer
 from shared.domain.exceptions import (
     BusinessRuleViolationException,
     EntityAlreadyExistsException,
@@ -64,16 +65,23 @@ SHARED_EXCEPTION_MAPPINGS = {
 }
 
 
+async def init_event_producer(
+    bootstrap_servers: str,
+) -> AsyncGenerator[IntegrationEventProducer, None]:
+    producer = KafkaIntegrationEventProducer(bootstrap_servers=bootstrap_servers)
+    await producer.start()
+    yield producer
+    await producer.stop()
+
+
 class AppContainer(containers.DeclarativeContainer):
     settings = providers.Configuration()
 
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
     # --- Integration Events Publisher ----
-
-    event_producer = providers.Singleton(
-        KafkaIntegrationEventProducer,
-        bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS,
+    event_producer = providers.Resource(
+        init_event_producer, bootstrap_servers=settings.kafka.BOOTSTRAP_SERVERS
     )
 
     # --- Module Containers ---

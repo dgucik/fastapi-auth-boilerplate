@@ -6,4 +6,4 @@ class AccountRegisteredHandler(
     IntegrationEventHandler[AccountRegisteredIntegrationEvent]
 ):
     async def handle(self, event: AccountRegisteredIntegrationEvent) -> None:
-        print(f"TEST: {event.account_id}", flush=True)
+        print(f"\n\nTEST: {event.account_id}\n\n", flush=True)

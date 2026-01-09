@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -20,40 +19,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting application...")
     container: AppContainer = app.state.container
 
-    kafka_producer = container.event_producer()
-    await kafka_producer.start()
+    if init_task := container.init_resources():
+        await init_task
 
-    auth_consumer = container.auth().event_consumer()
-    await auth_consumer.start()
-    auth_consumer_task = asyncio.create_task(auth_consumer.run_forever())
-
-    outbox_tasks = []
-
-    auth_processor = container.auth().outbox_processor()
-    outbox_tasks.append(
-        asyncio.create_task(
-            auth_processor.run_forever(interval=0.5), name="auth_outbox"
-        )
-    )
-    logger.info("Outbox processor started.")
-
-    logger.info("Application started successfully.")
     yield
 
-    logger.info("Shutting down application...")
-    for task in outbox_tasks:
-        task.cancel()
-
-    if outbox_tasks:
-        await asyncio.gather(*outbox_tasks, return_exceptions=True)
-
-    await kafka_producer.stop()
-
-    auth_consumer_task.cancel()
-    await auth_consumer.stop()
+    if shutdown_task := container.shutdown_resources():
+        await shutdown_task
 
     await close_db_connection()
-    logger.info("Application shutdown complete")
+    logger.info("Application shutdown complete.")
 
 
 def create_app() -> FastAPI:

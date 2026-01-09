@@ -22,7 +22,8 @@ class AioSmtpMailSender(MailSender):
             self._config = config
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        template_path = os.path.join(current_dir, "templates")
+        infra_dir = os.path.dirname(current_dir)
+        template_path = os.path.join(infra_dir, "templates")
 
         self._jinja_env = Environment(
             loader=FileSystemLoader(template_path),

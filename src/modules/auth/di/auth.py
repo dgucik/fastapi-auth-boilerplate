@@ -1,7 +1,9 @@
-from collections.abc import Callable
+import asyncio
+from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
 from dependency_injector import containers, providers
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from auth.di.partials.command_handlers import CommandHandlersContainer
 from auth.di.partials.domain_event_handlers import DomainEventHandlersContainer
@@ -20,7 +22,33 @@ from shared.application.ports import (
     DomainEventRegistry,
     IntegrationEventProducer,
 )
+from shared.infrastructure.outbox.mixin import OutboxMixin
 from shared.infrastructure.outbox.processor import OutboxProcessor
+
+
+async def init_outbox_processor(
+    session_factory: async_sessionmaker[AsyncSession],
+    event_bus: DomainEventBus,
+    event_registry: DomainEventRegistry,
+    outbox_model: type[OutboxMixin],
+    batch_size: int,
+) -> AsyncGenerator[None, None]:
+    processor = OutboxProcessor(
+        session_factory=session_factory,
+        event_bus=event_bus,
+        event_registry=event_registry,
+        outbox_model=outbox_model,
+        batch_size=batch_size,
+    )
+    task = asyncio.create_task(
+        processor.run_forever(interval=0.5), name="auth_outbox_task"
+    )
+    yield
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
 
 
 class AuthContainer(containers.DeclarativeContainer):
@@ -43,8 +71,8 @@ class AuthContainer(containers.DeclarativeContainer):
         event_registry=event_registry,
     )
 
-    outbox_processor = providers.Singleton(
-        OutboxProcessor,
+    outbox_processor = providers.Resource(
+        init_outbox_processor,
         session_factory=session_factory,
         event_bus=event_bus,
         event_registry=event_registry,
