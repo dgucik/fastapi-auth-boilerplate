@@ -4,11 +4,11 @@ from auth.application.queries.common_dtos import AccountDto
 from auth.application.queries.get_account_by_id import GetAccountByIdQuery
 from auth.application.queries.get_account_by_token import GetAccountByTokenQuery
 from auth.contracts.dtos import AuthAccountDto
-from auth.contracts.interfaces import AuthModuleContract
-from shared.infrastructure.cqrs_buses import QueryBus
+from auth.contracts.module_port import AuthModulePort
+from shared.infrastructure.cqrs.buses import QueryBus
 
 
-class AuthModuleApi(AuthModuleContract):
+class AuthModuleAdapter(AuthModulePort):
     def __init__(self, query_bus: QueryBus):
         self._query_bus = query_bus
 

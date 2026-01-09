@@ -1,4 +1,4 @@
-from shared.infrastructure.exceptions import InfrastructureException
+from shared.infrastructure.exceptions.exceptions import InfrastructureException
 
 
 class TokenExpiredException(InfrastructureException):

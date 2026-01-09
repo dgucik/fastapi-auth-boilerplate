@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 
 from auth.application.uow import AuthUnitOfWork
-from auth.domain.interfaces import TokenManager, TokenScope
+from auth.domain.ports import TokenManager, TokenScope
 from shared.application.ports import Command, Dto, Handler
 
 logger = logging.getLogger(__name__)

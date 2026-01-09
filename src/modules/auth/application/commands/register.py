@@ -4,9 +4,10 @@ from uuid import UUID, uuid4
 
 from auth.application.exceptions import PasswordsDoNotMatchException
 from auth.application.uow import AuthUnitOfWork
-from auth.domain.interfaces import TokenManager
+from auth.domain.ports import TokenManager
 from auth.domain.services.account_registration import AccountRegistrationService
-from auth.domain.value_objects import Email, PlainPassword
+from auth.domain.value_objects.email import Email
+from auth.domain.value_objects.plain_password import PlainPassword
 from shared.application.ports import Command, Handler
 
 logger = logging.getLogger(__name__)

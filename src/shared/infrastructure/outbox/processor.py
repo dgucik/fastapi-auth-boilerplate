@@ -1,54 +1,14 @@
 import asyncio
 import logging
-import uuid
 from datetime import UTC, datetime, timedelta
-from enum import StrEnum
-from typing import Any
 
-from sqlalchemy import JSON, DateTime, Integer, String, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 from shared.application.ports import DomainEventBus, DomainEventRegistry
+from shared.infrastructure.outbox.mixin import OutboxMixin, OutboxStatus
 
 logger = logging.getLogger(__name__)
-
-
-class OutboxStatus(StrEnum):
-    PENDING = "PENDING"
-    PROCESSED = "PROCESSED"
-    FAILED = "FAILED"
-
-
-class OutboxMixin(MappedAsDataclass):
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, init=False
-    )
-    event_type: Mapped[str] = mapped_column(String(255))
-
-    payload: Mapped[dict[str, Any]] = mapped_column(JSON)
-
-    status: Mapped[OutboxStatus] = mapped_column(
-        String(20), default=OutboxStatus.PENDING, index=True, init=False
-    )
-
-    attempts: Mapped[int] = mapped_column(Integer, default=0, init=False)
-
-    scheduled_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        index=True,
-        init=False,
-    )
-
-    last_error: Mapped[str | None] = mapped_column(String, nullable=True, init=False)
-
-    occurred_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), init=False
-    )
-    processed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, index=True, init=False
-    )
 
 
 class OutboxProcessor:
@@ -58,13 +18,13 @@ class OutboxProcessor:
         self,
         session_factory: async_sessionmaker[AsyncSession],
         event_bus: DomainEventBus,
-        registry: DomainEventRegistry,
+        event_registry: DomainEventRegistry,
         outbox_model: type[OutboxMixin],
         batch_size: int = 20,
     ):
         self._session_factory = session_factory
         self._event_bus = event_bus
-        self._registry = registry
+        self._event_registry = event_registry
         self._outbox_model = outbox_model
         self._batch_size = batch_size
 
@@ -88,7 +48,7 @@ class OutboxProcessor:
             processed_count = 0
             for record in records:
                 try:
-                    event_cls = self._registry.get_class(record.event_type)
+                    event_cls = self._event_registry.get_class(record.event_type)
                     event = event_cls.from_dict(record.payload)
 
                     await self._event_bus.publish(event)

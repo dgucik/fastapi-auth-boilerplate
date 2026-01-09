@@ -2,9 +2,10 @@ from uuid import UUID
 
 from auth.domain.entities.account import Account
 from auth.domain.exceptions import EmailAlreadyExistsException
-from auth.domain.interfaces import PasswordHasher
+from auth.domain.ports import PasswordHasher
 from auth.domain.repositories import AccountRepository
-from auth.domain.value_objects import Email, PlainPassword
+from auth.domain.value_objects.email import Email
+from auth.domain.value_objects.plain_password import PlainPassword
 
 
 class AccountRegistrationService:

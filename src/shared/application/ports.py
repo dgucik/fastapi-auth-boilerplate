@@ -82,7 +82,15 @@ class IntegrationEventHandler[TIntegrationEvent: IntegrationEvent](ABC):
         pass
 
 
-class IntegrationEventPublisher(ABC):
+class IntegrationEventProducer(ABC):
+    @abstractmethod
+    async def start(self) -> None:
+        pass
+
+    @abstractmethod
+    async def stop(self) -> None:
+        pass
+
     @abstractmethod
     async def publish(self, topic: str, event: IntegrationEvent) -> None:
         pass

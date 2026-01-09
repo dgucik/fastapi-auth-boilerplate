@@ -26,10 +26,10 @@ from auth.application.commands.request_verification_token import (
 from auth.application.commands.reset_password import ResetPasswordCommand
 from auth.application.commands.verify import VerifyEmailCommand
 from auth.application.exceptions import AccountDoesNotExistException
-from auth.container import AuthContainer
+from auth.di.auth import AuthContainer
 from auth.domain.entities.account import Account
 from shared.api.responses import MessageResponse
-from shared.infrastructure.cqrs_buses import CommandBus
+from shared.infrastructure.cqrs.buses import CommandBus
 
 router = APIRouter(tags=["Auth"])
 
@@ -40,7 +40,7 @@ router = APIRouter(tags=["Auth"])
 @inject
 async def register(
     request: RegisterRequest,
-    command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
+    command_bus: CommandBus = Depends(Provide[AuthContainer.command_handlers.bus]),
 ) -> RegisterResponse:
     cmd = RegisterCommand(
         email=request.email,

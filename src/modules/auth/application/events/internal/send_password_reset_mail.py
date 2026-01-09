@@ -1,19 +1,23 @@
 from auth.application.commands.send_mail import SendMailCommand
-from auth.domain.events import VerificationRequestedDomainEvent
+from auth.domain.events.password_reset_requested import (
+    PasswordResetRequestedDomainEvent,
+)
 from shared.application.ports import DomainEventHandler
-from shared.infrastructure.cqrs_buses import CommandBus
+from shared.infrastructure.cqrs.buses import CommandBus
 
 
-class SendVerificationMail(DomainEventHandler[VerificationRequestedDomainEvent]):
+class SendPasswordResetMailHandler(
+    DomainEventHandler[PasswordResetRequestedDomainEvent]
+):
     def __init__(self, command_bus: CommandBus, base_url: str) -> None:
         self._command_bus = command_bus
         self._base_url = base_url
 
-    async def handle(self, event: VerificationRequestedDomainEvent) -> None:
+    async def handle(self, event: PasswordResetRequestedDomainEvent) -> None:
         recipient = event.email.value
-        subject = "Please verify your email address"
-        template_name = "verification_mail.html"
-        context = {"verification_link": f"{self._base_url}/verify?token={event.token}"}
+        subject = "Reset your password"
+        template_name = "reset_password_mail.html"
+        context = {"reset_link": f"{self._base_url}/reset-password?token={event.token}"}
 
         cmd = SendMailCommand(
             recipient=recipient,

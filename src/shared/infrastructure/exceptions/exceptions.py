@@ -21,15 +21,26 @@ class SessionNotInitializedException(InfrastructureException):
 class DatabaseConnectionException(InfrastructureException):
     """Base exception for database connection errors"""
 
-    pass
+    def __init__(self, message: str = "Database connection error."):
+        super().__init__(message)
 
 
 class ExternalServiceException(InfrastructureException):
     """Base exception for external service integration errors"""
 
-    pass
+    def __init__(self, message: str = "External service error."):
+        super().__init__(message)
 
 
 class ConsumerNotStartedException(InfrastructureException):
+    """Exception for consumer not started."""
+
     def __init__(self, message: str = "Consumer not started."):
+        super().__init__(message)
+
+
+class ProducerNotStartedException(InfrastructureException):
+    """Exception for producer not started."""
+
+    def __init__(self, message: str = "Producer not started."):
         super().__init__(message)

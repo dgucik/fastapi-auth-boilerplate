@@ -5,7 +5,7 @@ from auth.domain.repositories import AccountRepository
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.repositories import SqlAlchemyAccountRepository
 from shared.application.ports import DomainEventBus, DomainEventRegistry
-from shared.infrastructure.base_uow import BaseSqlAlchemyUnitOfWork
+from shared.infrastructure.database.base_uow import BaseSqlAlchemyUnitOfWork
 
 
 class SqlAlchemyUnitOfWork(BaseSqlAlchemyUnitOfWork, AuthUnitOfWork):

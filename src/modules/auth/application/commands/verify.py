@@ -4,7 +4,7 @@ from uuid import UUID
 
 from auth.application.exceptions import AccountDoesNotExistException
 from auth.application.uow import AuthUnitOfWork
-from auth.domain.interfaces import TokenManager, TokenScope
+from auth.domain.ports import TokenManager, TokenScope
 from shared.application.ports import Command, Handler
 
 logger = logging.getLogger(__name__)

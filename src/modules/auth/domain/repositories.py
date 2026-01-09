@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from auth.domain.entities.account import Account
-from auth.domain.value_objects import Email
+from auth.domain.value_objects.email import Email
 
 
 class AccountRepository(ABC):

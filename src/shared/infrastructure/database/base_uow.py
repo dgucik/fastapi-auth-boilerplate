@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from shared.application.ports import DomainEventBus, DomainEventRegistry, UnitOfWork
 from shared.domain.registry import AggregateRegistry
-from shared.infrastructure.exceptions import SessionNotInitializedException
-from shared.infrastructure.outbox import OutboxMixin
+from shared.infrastructure.exceptions.exceptions import SessionNotInitializedException
+from shared.infrastructure.outbox.mixin import OutboxMixin
 
 logger = logging.getLogger(__name__)
 
