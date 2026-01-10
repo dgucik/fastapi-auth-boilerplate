@@ -5,8 +5,10 @@ from auth.domain.services.account_registration import AccountRegistrationService
 
 
 class DomainServicesContainer(containers.DeclarativeContainer):
+    # --- Dependencies ---
     infra_services = providers.DependenciesContainer()
 
+    # --- Services ---
     account_registration_service = providers.Factory(
         AccountRegistrationService, hasher=infra_services.hasher
     )

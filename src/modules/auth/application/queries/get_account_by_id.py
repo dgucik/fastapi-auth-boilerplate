@@ -17,9 +17,12 @@ class GetAccountByIdHandler(Handler[GetAccountByIdQuery, AccountDto]):
         self._uow = uow
 
     async def handle(self, query: GetAccountByIdQuery) -> AccountDto:
-        account = await self._uow.accounts.get_by_id(query.account_id)
+        async with self._uow:
+            account = await self._uow.accounts.get_by_id(query.account_id)
 
         if not account:
             raise ContractAccountNotFoundException
 
-        return AccountDto(id=account.id, email=account.email.value)
+        return AccountDto(
+            id=account.id, email=account.email.value, is_superuser=account.is_superuser
+        )

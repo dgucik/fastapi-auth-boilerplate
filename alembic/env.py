@@ -30,7 +30,8 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from config.env import settings  # noqa
 from config.database import Base
-from auth.infrastructure.database.models import AccountModel # noqa
+from auth.infrastructure.database.models import AccountModel, AuthOutboxEvent # noqa
+from users.infrastructure.database.models import UserModel, UsersOutboxEvent
 
 target_metadata = [Base.metadata]
 

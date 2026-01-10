@@ -4,7 +4,7 @@ from types import TracebackType
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from shared.application.ports import DomainEventBus, DomainEventRegistry, UnitOfWork
+from shared.application.ports import DomainEventRegistry, UnitOfWork
 from shared.domain.registry import AggregateRegistry
 from shared.infrastructure.exceptions.exceptions import SessionNotInitializedException
 from shared.infrastructure.outbox.mixin import OutboxMixin
@@ -16,12 +16,10 @@ class BaseSqlAlchemyUnitOfWork(UnitOfWork):
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
-        event_bus: DomainEventBus,
         event_registry: DomainEventRegistry,
     ):
         self._session_factory = session_factory
         self._session: AsyncSession | None = None
-        self._event_bus = event_bus
         self._registry = event_registry
 
     async def __aenter__(self) -> "BaseSqlAlchemyUnitOfWork":

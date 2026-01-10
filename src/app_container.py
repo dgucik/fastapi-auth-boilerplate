@@ -3,6 +3,7 @@ from typing import Any
 
 from dependency_injector import containers, providers
 from starlette import status
+from users.containers.users import UsersContainer
 
 from auth import AuthContainer
 from shared.application.exceptions import (
@@ -26,6 +27,7 @@ from shared.infrastructure.exceptions.exception_registry import (
 from shared.infrastructure.exceptions.exceptions import (
     DatabaseConnectionException,
     ExternalServiceException,
+    PermissionDeniedException,
 )
 from shared.infrastructure.messaging.event_producer import (
     KafkaIntegrationEventProducer,
@@ -62,6 +64,9 @@ SHARED_EXCEPTION_MAPPINGS = {
     ExternalServiceException: ExceptionMetadata(
         status.HTTP_503_SERVICE_UNAVAILABLE, "external_service_error"
     ),
+    PermissionDeniedException: ExceptionMetadata(
+        status.HTTP_403_FORBIDDEN, "permission_denied"
+    ),
 }
 
 
@@ -92,12 +97,21 @@ class AppContainer(containers.DeclarativeContainer):
         event_producer=event_producer,
     )
 
+    users = providers.Container(
+        UsersContainer,
+        settings=settings,
+        session_factory=session_factory,
+        event_producer=event_producer,
+        auth_contract=auth.auth_module_adapter,
+    )
+
     # --- Exceptions ---
     exc_registry = providers.Singleton(
         ExceptionRegistry,
         mappings_list=providers.List(
             SHARED_EXCEPTION_MAPPINGS,
             auth.exception_mappings,
+            # users.exception_mappings,
         ),
     )
 

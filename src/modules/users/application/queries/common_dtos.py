@@ -3,7 +3,6 @@ from uuid import UUID
 
 
 @dataclass(frozen=True)
-class AuthAccountDto:
+class UserDto:
     id: UUID
-    email: str
-    is_superuser: bool
+    username: str

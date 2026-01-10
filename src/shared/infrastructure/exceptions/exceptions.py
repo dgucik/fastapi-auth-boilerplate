@@ -44,3 +44,10 @@ class ProducerNotStartedException(InfrastructureException):
 
     def __init__(self, message: str = "Producer not started."):
         super().__init__(message)
+
+
+class PermissionDeniedException(InfrastructureException):
+    """Raised when actor has no permission to perform action."""
+
+    def __init__(self, message: str = "No permission to perform this action."):
+        super().__init__(message)

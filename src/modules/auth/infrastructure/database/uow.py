@@ -4,21 +4,20 @@ from auth.application.uow import AuthUnitOfWork
 from auth.domain.repositories import AccountRepository
 from auth.infrastructure.database.models import AuthOutboxEvent
 from auth.infrastructure.database.repositories import SqlAlchemyAccountRepository
-from shared.application.ports import DomainEventBus, DomainEventRegistry
+from shared.application.ports import DomainEventRegistry
 from shared.infrastructure.database.base_uow import BaseSqlAlchemyUnitOfWork
 
 
-class SqlAlchemyUnitOfWork(BaseSqlAlchemyUnitOfWork, AuthUnitOfWork):
+class SqlAlchemyAuthUnitOfWork(BaseSqlAlchemyUnitOfWork, AuthUnitOfWork):
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
-        event_bus: DomainEventBus,
         event_registry: DomainEventRegistry,
     ):
-        super().__init__(session_factory, event_bus, event_registry)
+        super().__init__(session_factory, event_registry)
         self.accounts: AccountRepository
 
-    async def __aenter__(self) -> "SqlAlchemyUnitOfWork":
+    async def __aenter__(self) -> "SqlAlchemyAuthUnitOfWork":
         await super().__aenter__()
         if self._session is not None:
             self.accounts = SqlAlchemyAccountRepository(self._session)

@@ -22,7 +22,6 @@ from auth.application.commands.reset_password import (
     ResetPasswordCommand,
     ResetPasswordHandler,
 )
-from auth.application.commands.send_mail import SendMailCommand, SendMailHandler
 from auth.application.commands.verify import VerifyEmailCommand, VerifyEmailHandler
 from auth.application.uow import AuthUnitOfWork
 from shared.infrastructure.cqrs.buses import CommandBus
@@ -86,10 +85,6 @@ class CommandHandlersContainer(containers.DeclarativeContainer):
         RefreshTokenHandler, uow=uow, token_manager=infra_services.token_manager
     )
 
-    send_mail_handler = providers.Factory(
-        SendMailHandler, mail_sender=infra_services.mail_sender
-    )
-
     # --- Handlers Map ---
     handlers = providers.Dict(
         {
@@ -101,7 +96,6 @@ class CommandHandlersContainer(containers.DeclarativeContainer):
             ResetPasswordCommand: reset_password_handler,
             ChangePasswordCommand: change_password_handler,
             RefreshTokenCommand: refresh_token_handler,
-            SendMailCommand: send_mail_handler,
         }
     )
 

@@ -63,20 +63,21 @@ src/
 │   ├── auth/
 │   │   ├── api/                    # Routes / Controllers
 │   │   ├── application/            # Use Cases (Commands/Queries/Event Handlers)
-│   │   ├── di/                     # Module-specific DI Containers
+│   │   ├── containers/             # Module-specific DI Containers
+│   │   ├── contracts/              # Public module interface (DTOs, ports, events, shared contracts)
 │   │   ├── domain/                 # Core Logic (Aggregates, Entities, Value Objects)
 │   │   └── infrastructure/         # Implementation (Repo, Adapters)
 │   ├── users/
 │   │   ├── api/
 │   │   ├── application/
+│   │   ├── containers/
 │   │   ├── domain/
-│   │   ├── infrastructure/
-│   │   └── di.py
+│   │   └── infrastructure/
 ├── shared/                         # Shared Kernel (Event Bus, Base Classes)
 │   ├── application/
 │   ├── domain/
 │   └── infrastructure/
-├── di.py                           # Root DI Container (composes module containers)
+├── app_container.py                # Root DI Container (composes module containers)
 ├── main.py                         # App Entrypoint
 └── middlewares.py                  # Request/Response Processing Layers
 ```
