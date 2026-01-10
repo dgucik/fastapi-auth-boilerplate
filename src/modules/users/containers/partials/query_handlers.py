@@ -13,13 +13,9 @@ from shared.infrastructure.cqrs.buses import QueryBus
 
 
 class QueryHandlersContainer(containers.DeclarativeContainer):
-    """
-    Query handlers container.
+    """Container for query handlers.
 
-    To add a new query:
-    1. Import the query and handler in the imports section
-    2. Add the handler factory here
-    3. Add to handlers dict
+    Provides factories for all query handlers in the users module.
     """
 
     # --- Dependencies ---

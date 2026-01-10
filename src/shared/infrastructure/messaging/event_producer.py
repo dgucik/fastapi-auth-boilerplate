@@ -13,21 +13,39 @@ logger = logging.getLogger(__name__)
 
 
 class KafkaIntegrationEventProducer(IntegrationEventProducer):
+    """Kafka implementation of integration event producer.
+
+    Args:
+        bootstrap_servers: Kafka servers.
+    """
+
     def __init__(self, bootstrap_servers: str) -> None:
+        """Initializes the producer."""
         self._bootstrap_servers = bootstrap_servers
         self._producer: AIOKafkaProducer | None = None
 
     async def start(self) -> None:
+        """Starts the Kafka producer."""
         self._producer = AIOKafkaProducer(bootstrap_servers=self._bootstrap_servers)
         await self._producer.start()
         logger.info("Kafka producer started.")
 
     async def stop(self) -> None:
+        """Stops the Kafka producer."""
         if self._producer:
             await self._producer.stop()
             logger.info("Kafka producer stopped.")
 
     async def publish(self, topic: str, event: IntegrationEvent) -> None:
+        """Publishes an integration event to Kafka.
+
+        Args:
+            topic: Target topic.
+            event: Event to publish.
+
+        Raises:
+            ProducerNotStartedException: If producer is not started.
+        """
         if not self._producer:
             raise ProducerNotStartedException
         payload = json.dumps(event.to_dict()).encode("utf-8")

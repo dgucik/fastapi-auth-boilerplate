@@ -16,5 +16,14 @@ async def get_current_account_from_header(
     token: str = Depends(oauth2_scheme),
     contract: AuthModulePort = Depends(Provide[UsersContainer.auth_contract]),
 ) -> AuthAccountDto:
+    """Gets current user account from JWT token header.
+
+    Args:
+        token: JWT access token.
+        contract: Auth module contract for token validation.
+
+    Returns:
+        AuthAccountDto: Current user account data.
+    """
     account_dto = await contract.get_account_by_token(token)
     return account_dto

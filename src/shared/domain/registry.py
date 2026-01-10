@@ -5,6 +5,8 @@ from shared.domain.primitives import AggregateRoot
 
 
 class AggregateRegistry:
+    """Registry to track aggregates in the current context."""
+
     _aggregates: ContextVar[set[AggregateRoot] | None] = ContextVar(
         "aggregates", default=None
     )
@@ -19,12 +21,22 @@ class AggregateRegistry:
 
     @classmethod
     def register(cls, aggregate: AggregateRoot) -> None:
+        """Registers an aggregate in the current context.
+
+        Args:
+            aggregate: Aggregate root instance.
+        """
         if not isinstance(aggregate, AggregateRoot):
             return
         cls._get_or_init_set().add(aggregate)
 
     @classmethod
     def pull_events(cls) -> list[DomainEvent]:
+        """Collects all events from registered aggregates.
+
+        Returns:
+            list[DomainEvent]: List of all domain events.
+        """
         all_events = []
         current_set = cls._aggregates.get()
         if current_set:
@@ -34,4 +46,5 @@ class AggregateRegistry:
 
     @classmethod
     def clear(cls) -> None:
+        """Clears the registry for the current context."""
         cls._aggregates.set(None)

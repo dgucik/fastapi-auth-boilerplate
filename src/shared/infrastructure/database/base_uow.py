@@ -13,11 +13,21 @@ logger = logging.getLogger(__name__)
 
 
 class BaseSqlAlchemyUnitOfWork(UnitOfWork):
+    """Base Unit of Work for SQLAlchemy.
+
+    Handles transaction management and outbox pattern.
+
+    Args:
+        session_factory: Factory for sessions.
+        event_registry: Registry for domain events.
+    """
+
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
         event_registry: DomainEventRegistry,
     ):
+        """Initializes the UoW."""
         self._session_factory = session_factory
         self._session: AsyncSession | None = None
         self._registry = event_registry
@@ -36,6 +46,11 @@ class BaseSqlAlchemyUnitOfWork(UnitOfWork):
             await self.rollback()
 
     async def commit(self) -> None:
+        """Commits transaction and processes outbox events.
+
+        Raises:
+            SessionNotInitializedException: If session is missing.
+        """
         if not self._session:
             raise SessionNotInitializedException
 
@@ -53,6 +68,11 @@ class BaseSqlAlchemyUnitOfWork(UnitOfWork):
         logger.debug("UnitOfWork committed successfully")
 
     async def rollback(self) -> None:
+        """Rolls back the current transaction.
+
+        Raises:
+            SessionNotInitializedException: If session is missing.
+        """
         if not self._session:
             raise SessionNotInitializedException
 
@@ -61,4 +81,5 @@ class BaseSqlAlchemyUnitOfWork(UnitOfWork):
 
     @abstractmethod
     def _get_outbox_model(self) -> type[OutboxMixin]:
+        """Returns the outbox model class."""
         pass

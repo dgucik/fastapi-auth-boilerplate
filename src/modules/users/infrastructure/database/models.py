@@ -9,6 +9,8 @@ from shared.infrastructure.outbox.mixin import OutboxMixin
 
 
 class UserModel(Base):
+    """SQLAlchemy model for users table."""
+
     __tablename__ = "users"
     __table_args__ = {"extend_existing": True}
 
@@ -22,4 +24,6 @@ class UserModel(Base):
 
 
 class UsersOutboxEvent(Base, OutboxMixin):
+    """SQLAlchemy model for users outbox events."""
+
     __tablename__ = "users_outbox_events"

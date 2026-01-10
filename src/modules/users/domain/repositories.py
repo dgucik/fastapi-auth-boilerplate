@@ -6,6 +6,8 @@ from users.domain.value_objects.username import Username
 
 
 class UserRepository(ABC):
+    """Abstract base class for User repository."""
+
     @abstractmethod
     async def get_by_id(self, user_id: UUID) -> User | None:
         """Retrieve a user by their unique identifier."""

@@ -8,6 +8,8 @@ from shared.domain.events import DomainEvent
 
 # --- UOW ---
 class UnitOfWork(ABC):
+    """Abstract interface for Unit of Work pattern."""
+
     @abstractmethod
     async def commit(self) -> None:
         pass
@@ -36,18 +38,24 @@ class UnitOfWork(ABC):
 
 # --- Domain Events ---
 class DomainEventHandler[TDomainEvent: DomainEvent](ABC):
+    """Abstract interface for domain event handlers."""
+
     @abstractmethod
     async def handle(self, event: TDomainEvent) -> None:
         pass
 
 
 class DomainEventBus(ABC):
+    """Abstract interface for domain event bus."""
+
     @abstractmethod
     async def publish(self, event: DomainEvent) -> None:
         pass
 
 
 class DomainEventRegistry(ABC):
+    """Abstract interface for domain event registry."""
+
     @abstractmethod
     def _register(self, event_class: type[DomainEvent]) -> None:
         pass
@@ -64,6 +72,8 @@ class DomainEventRegistry(ABC):
 # --- Integration Events ---
 @dataclass(frozen=True)
 class IntegrationEvent(ABC):
+    """Abstract base class for integration events."""
+
     TOPIC: str = "default"
 
     @abstractmethod
@@ -77,12 +87,16 @@ class IntegrationEvent(ABC):
 
 
 class IntegrationEventHandler[TIntegrationEvent: IntegrationEvent](ABC):
+    """Abstract interface for integration event handlers."""
+
     @abstractmethod
     async def handle(self, event: TIntegrationEvent) -> None:
         pass
 
 
 class IntegrationEventProducer(ABC):
+    """Abstract interface for integration event producer."""
+
     @abstractmethod
     async def start(self) -> None:
         pass
@@ -97,6 +111,8 @@ class IntegrationEventProducer(ABC):
 
 
 class IntegrationEventConsumer(ABC):
+    """Abstract interface for integration event consumer."""
+
     @abstractmethod
     async def start(self) -> None:
         pass
@@ -117,26 +133,36 @@ type TResult = Dto | None
 
 @dataclass(frozen=True)
 class Command:
+    """Base class for commands."""
+
     pass
 
 
 @dataclass(frozen=True)
 class Query:
+    """Base class for queries."""
+
     pass
 
 
 @dataclass(frozen=True)
 class Dto:
+    """Base class for Data Transfer Objects."""
+
     pass
 
 
 class Handler[TMessage, TResult](ABC):
+    """Abstract interface for message handlers."""
+
     @abstractmethod
     async def handle(self, message: TMessage) -> TResult:
         pass
 
 
 class CqrsBus[TMessage, TResult](ABC):
+    """Abstract interface for CQRS buses."""
+
     @abstractmethod
     async def dispatch(self, message: TMessage) -> TResult:
         pass

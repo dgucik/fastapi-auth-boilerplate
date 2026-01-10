@@ -16,6 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class KafkaIntegrationEventConsumer(IntegrationEventConsumer):
+    """Kafka implementation of integration event consumer.
+
+    Args:
+        bootstrap_servers: Kafka servers.
+        group_id: Consumer group.
+        topics: Topics to subscribe to.
+        event_map: Mapping of event names to handlers.
+    """
+
     def __init__(
         self,
         bootstrap_servers: str,
@@ -25,6 +34,7 @@ class KafkaIntegrationEventConsumer(IntegrationEventConsumer):
             str, tuple[type[Any], Callable[[], IntegrationEventHandler[Any]]]
         ],
     ) -> None:
+        """Initializes the consumer."""
         self._bootstrap_servers = bootstrap_servers
         self._group_id = group_id
         self._topics = topics
@@ -33,6 +43,7 @@ class KafkaIntegrationEventConsumer(IntegrationEventConsumer):
         self._is_running = False
 
     async def start(self) -> None:
+        """Starts the Kafka consumer."""
         self._consumer = AIOKafkaConsumer(
             *self._topics,
             bootstrap_servers=self._bootstrap_servers,
@@ -45,12 +56,18 @@ class KafkaIntegrationEventConsumer(IntegrationEventConsumer):
         logger.info(f"Kafka Consumer started on topics: {self._topics}.")
 
     async def stop(self) -> None:
+        """Stops the Kafka consumer."""
         self._is_running = False
         if self._consumer:
             await self._consumer.stop()
             logger.info("Kafka Consumer stopped.")
 
     async def run_forever(self) -> None:
+        """Runs the consumer loop indefinitely.
+
+        Raises:
+            ConsumerNotStartedException: If consumer isn't started.
+        """
         if not self._consumer:
             raise ConsumerNotStartedException
 

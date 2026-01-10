@@ -32,6 +32,18 @@ async def init_outbox_processor(
     outbox_model: type[OutboxMixin],
     batch_size: int,
 ) -> AsyncGenerator[None, None]:
+    """Initializes and runs the outbox processor.
+
+    Args:
+        session_factory: SQLAlchemy session factory.
+        event_bus: Domain event bus.
+        event_registry: Domain event registry.
+        outbox_model: Model class for outbox events.
+        batch_size: Number of events to process per batch.
+
+    Yields:
+        None: Yields control back to the caller while running.
+    """
     processor = OutboxProcessor(
         session_factory=session_factory,
         event_bus=event_bus,
@@ -51,6 +63,11 @@ async def init_outbox_processor(
 
 
 class UsersContainer(containers.DeclarativeContainer):
+    """Main container for the Users module.
+
+    Wires together all sub-containers and dependencies.
+    """
+
     # --- Dependencies ---
     event_producer: providers.Dependency[IntegrationEventProducer] = (
         providers.Dependency()

@@ -20,6 +20,17 @@ async def init_event_consumer(
     topics: list[str],
     event_map: dict[str, tuple[type[Any], Callable[[], IntegrationEventHandler[Any]]]],
 ) -> AsyncGenerator[None, None]:
+    """Initializes and runs the Kafka event consumer.
+
+    Args:
+        bootstrap_servers: Kafka bootstrap servers.
+        group_id: Consumer group ID.
+        topics: List of topics to subscribe to.
+        event_map: Mapping of event names to types and handlers.
+
+    Yields:
+        None: Yields control back to the caller while running.
+    """
     consumer = KafkaIntegrationEventConsumer(
         bootstrap_servers=bootstrap_servers,
         group_id=group_id,
@@ -36,13 +47,9 @@ async def init_event_consumer(
 
 
 class IntegrationEventHandlersContainer(containers.DeclarativeContainer):
-    """
-    Integration Event handlers container
+    """Container for integration event handlers.
 
-    To add a new event:
-    1. Import the event and handler in the imports section
-    2. Add the handler factory here
-    3. Add to handlers dict
+    Configures consumers and handlers for external integration events.
     """
 
     # --- Dependencies ---
