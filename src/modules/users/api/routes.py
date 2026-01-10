@@ -5,7 +5,7 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status
 from users.api.dependencies import get_current_account_from_header
 from users.api.responses import GetUserByIdResponse, MeResponse
-from users.api.schemas import UpdateMeRequest
+from users.api.schemas import UpdateMeRequest, UpdateUserIdRequest
 from users.application.commands.update_user import UpdateUserCommand
 from users.application.queries.get_user_by_account_id import GetUserByAccountIdQuery
 from users.application.queries.get_user_by_id import GetUserByIdQuery
@@ -39,7 +39,9 @@ async def update_me(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
 ) -> None:
-    cmd = UpdateUserCommand(account_id=current_account.id, username=request.username)
+    cmd = UpdateUserCommand(
+        actor_account_id=current_account.id, username=request.username
+    )
     await command_bus.dispatch(cmd)
 
 
@@ -58,12 +60,18 @@ async def read_by_id(
     )
 
 
-# @router.get("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-# @inject
-# async def update_by_id(
-#     id: UUID,
-#     _: AuthAccountDto = Depends(require_superuser()),
-#     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
-# ) -> None:
-#     cmd = None
-#     await command_bus.dispatch(cmd)
+@router.patch("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def update_by_id(
+    request: UpdateUserIdRequest,
+    id: UUID,
+    current_account: AuthAccountDto = Depends(get_current_account_from_header),
+    command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
+) -> None:
+    cmd = UpdateUserCommand(
+        username=request.username,
+        actor_account_id=current_account.id,
+        target_user_id=id,
+        is_superuser=current_account.is_superuser,
+    )
+    await command_bus.dispatch(cmd)
