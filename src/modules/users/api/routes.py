@@ -7,7 +7,10 @@ from users.api.dependencies import get_current_account_from_header
 from users.api.responses import GetUserByIdResponse, MeResponse
 from users.api.schemas import UpdateMeRequest, UpdateUserIdRequest
 from users.application.commands.delete_user_by_id import DeleteUserProfileByIdCommand
-from users.application.commands.update_user import UpdateUserCommand
+from users.application.commands.update_my_user_profile import UpdateMyUserProfileCommand
+from users.application.commands.update_user_profile_by_id import (
+    UpdateUserProfileByIdCommand,
+)
 from users.application.queries.get_my_user_profile import GetMyUserProfileQuery
 from users.application.queries.get_user_profile_by_id import GetUserProfileByIdQuery
 from users.containers.users import UsersContainer
@@ -40,8 +43,8 @@ async def update_me(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
 ) -> None:
-    cmd = UpdateUserCommand(
-        actor_account_id=current_account.id, username=request.username
+    cmd = UpdateMyUserProfileCommand(
+        account_id=current_account.id, username=request.username
     )
     await command_bus.dispatch(cmd)
 
@@ -72,10 +75,9 @@ async def update_by_id(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
 ) -> None:
-    cmd = UpdateUserCommand(
+    cmd = UpdateUserProfileByIdCommand(
         username=request.username,
-        actor_account_id=current_account.id,
-        target_user_id=id,
+        user_id=id,
         is_superuser=current_account.is_superuser,
     )
     await command_bus.dispatch(cmd)
