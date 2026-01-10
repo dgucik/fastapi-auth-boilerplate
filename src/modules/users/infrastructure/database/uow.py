@@ -9,11 +9,24 @@ from shared.infrastructure.database.base_uow import BaseSqlAlchemyUnitOfWork
 
 
 class SqlAlchemyUsersUnitOfWork(BaseSqlAlchemyUnitOfWork, UsersUnitOfWork):
+    """SQLAlchemy implementation of UsersUnitOfWork.
+
+    Args:
+        session_factory: Factory for async sessions.
+        event_registry: Domain event registry.
+    """
+
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
         event_registry: DomainEventRegistry,
     ):
+        """Initializes the Unit of Work.
+
+        Args:
+            session_factory: Session factory.
+            event_registry: Event registry.
+        """
         super().__init__(session_factory, event_registry)
         self.users: UserRepository
 

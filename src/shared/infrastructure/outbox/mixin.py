@@ -8,12 +8,28 @@ from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 
 class OutboxStatus(StrEnum):
+    """Enumeration of outbox message statuses."""
+
     PENDING = "PENDING"
     PROCESSED = "PROCESSED"
     FAILED = "FAILED"
 
 
 class OutboxMixin(MappedAsDataclass):
+    """Mixin for adding outbox functionality to SQLAlchemy models.
+
+    Attributes:
+        id: Unique identifier.
+        event_type: Name of the event.
+        payload: JSON payload of the event.
+        status: Processing status.
+        attempts: Number of processing attempts.
+        scheduled_at: Next scheduled processing time.
+        last_error: Error message if last attempt failed.
+        occurred_at: Timestamp of event occurrence.
+        processed_at: Timestamp of successful processing.
+    """
+
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True, default=uuid.uuid4, init=False
     )

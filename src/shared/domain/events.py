@@ -5,6 +5,8 @@ from typing import Any
 
 @dataclass(frozen=True)
 class DomainEvent(ABC):
+    """Base class for domain events."""
+
     @abstractmethod
     def to_dict(self) -> dict[str, Any]:
         pass

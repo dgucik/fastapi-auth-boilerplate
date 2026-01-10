@@ -14,11 +14,29 @@ logger = logging.getLogger(__name__)
 
 
 class CreateUserHandler(IntegrationEventHandler[AccountRegisteredIntegrationEvent]):
+    """Handler for account registration events to create user profiles.
+
+    Args:
+        uow: Unit of Work for users module.
+        service: User creation domain service.
+    """
+
     def __init__(self, uow: UsersUnitOfWork, service: UserCreationService):
+        """Initializes the handler.
+
+        Args:
+            uow: Users Unit of Work.
+            service: User creation service.
+        """
         self._uow = uow
         self._service = service
 
     async def handle(self, event: AccountRegisteredIntegrationEvent) -> None:
+        """Handles the account registered event.
+
+        Args:
+            event: The integration event.
+        """
         user_id = uuid4()
         random_id = "".join(secrets.choice(string.digits) for _ in range(9))
         username = f"User_{random_id}"

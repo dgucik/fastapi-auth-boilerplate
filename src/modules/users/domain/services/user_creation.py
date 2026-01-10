@@ -10,6 +10,8 @@ from users.domain.value_objects.username import Username
 
 
 class UserCreationService:
+    """Domain service for handling user creation rules."""
+
     async def create_user(
         self,
         repository: UserRepository,
@@ -17,6 +19,21 @@ class UserCreationService:
         account_id: UUID,
         username: Username,
     ) -> User:
+        """Creates a new user ensuring domain rules.
+
+        Args:
+            repository: User repository to check uniqueness.
+            user_id: New User UUID.
+            account_id: Associated Account UUID.
+            username: Desired Username.
+
+        Returns:
+            User: Created User entity.
+
+        Raises:
+            UsernameIsAlreadyTakenException: If username is taken.
+            UserAlreadyExistsForAccountException: If account already has a user profile.
+        """
         if await repository.get_by_username(username):
             raise UsernameIsAlreadyTakenException
 

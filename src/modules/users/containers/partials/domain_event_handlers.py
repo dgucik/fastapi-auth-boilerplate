@@ -6,14 +6,9 @@ from shared.infrastructure.messaging.event_registry import DomainEventRegistryIm
 
 
 class DomainEventHandlersContainer(containers.DeclarativeContainer):
-    """
-    Domain Event handlers container
+    """Container for domain event handlers.
 
-    To add a new event:
-    1. Import the event and handler in the imports section
-    2. Add the handler factory here
-    3. Add to handlers dict
-    4. Add to registry
+    Manages registration and bus configuration for domain events.
     """
 
     # --- Dependencies ---

@@ -12,17 +12,29 @@ logger = logging.getLogger(__name__)
 
 
 class InMemoryDomainEventBus(DomainEventBus):
+    """In-memory implementation of DomainEventBus.
+
+    Args:
+        subscribers: Map of event types to handler factories.
+    """
+
     def __init__(
         self,
         subscribers: dict[
             type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
         ],
     ):
+        """Initializes with subscribers."""
         self._subscribers: dict[
             type[DomainEvent], list[Callable[[], DomainEventHandler[DomainEvent]]]
         ] = subscribers or {}
 
     async def publish(self, event: DomainEvent) -> None:
+        """Publishes a domain event to all local subscribers.
+
+        Args:
+            event: The domain event to publish.
+        """
         handler_factories = self._subscribers.get(type(event), [])
         if not handler_factories:
             logger.debug(f"No subscribers for event: {type(event).__name__}")

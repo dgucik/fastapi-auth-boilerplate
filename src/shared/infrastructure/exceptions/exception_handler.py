@@ -6,10 +6,18 @@ from shared.infrastructure.exceptions.exception_registry import ExceptionRegistr
 
 
 class GlobalExceptionHandler:
+    """Global exception handler for the application.
+
+    Args:
+        registry: Registry mapping exceptions to metadata.
+    """
+
     def __init__(self, registry: ExceptionRegistry) -> None:
+        """Initializes the handler."""
         self.registry = registry
 
     async def __call__(self, request: Request, exc: Exception) -> JSONResponse:
+        """Handles exceptions and returns appropriate JSON response."""
         metadata = self.registry.get_metadata(exc)
 
         if metadata:

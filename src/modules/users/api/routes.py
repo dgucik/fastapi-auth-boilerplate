@@ -27,6 +27,15 @@ async def read_me(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     query_bus: QueryBus = Depends(Provide[UsersContainer.query_bus]),
 ) -> MeResponse:
+    """Get current user's profile information.
+
+    Args:
+        current_account: Authenticated user account.
+        query_bus: Bus to dispatch query.
+
+    Returns:
+        MeResponse: Current user profile details.
+    """
     query = GetMyUserProfileQuery(account_id=current_account.id)
     result = await query_bus.dispatch(query)
     return MeResponse(
@@ -43,6 +52,13 @@ async def update_me(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
 ) -> None:
+    """Update current user's profile.
+
+    Args:
+        request: Update data.
+        current_account: Authenticated user account.
+        command_bus: Bus to dispatch command.
+    """
     cmd = UpdateMyUserProfileCommand(
         account_id=current_account.id, username=request.username
     )
@@ -56,6 +72,16 @@ async def read_by_id(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     query_bus: QueryBus = Depends(Provide[UsersContainer.query_bus]),
 ) -> GetUserByIdResponse:
+    """Get user profile by ID.
+
+    Args:
+        id: Target user UUID.
+        current_account: Authenticated user account.
+        query_bus: Bus to dispatch query.
+
+    Returns:
+        GetUserByIdResponse: User profile details.
+    """
     query = GetUserProfileByIdQuery(
         user_id=id,
         is_superuser=current_account.is_superuser,
@@ -75,6 +101,14 @@ async def update_by_id(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
 ) -> None:
+    """Update another user's profile by ID.
+
+    Args:
+        request: Update data.
+        id: Target user UUID.
+        current_account: Authenticated user account.
+        command_bus: Bus to dispatch command.
+    """
     cmd = UpdateUserProfileByIdCommand(
         username=request.username,
         user_id=id,
@@ -90,6 +124,13 @@ async def delete_by_id(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
 ) -> None:
+    """Delete a user profile by ID.
+
+    Args:
+        id: Target user UUID.
+        current_account: Authenticated user account.
+        command_bus: Bus to dispatch command.
+    """
     cmd = DeleteUserProfileByIdCommand(
         user_id=id, is_superuser=current_account.is_superuser
     )

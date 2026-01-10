@@ -12,6 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class OutboxProcessor:
+    """Processes pending outbox events.
+
+    Args:
+        session_factory: Factory for DB sessions.
+        event_bus: Bus to publish domain events.
+        event_registry: Registry to deserialize events.
+        outbox_model: Model class for outbox table.
+        batch_size: Number of events to process at once.
+    """
+
     MAX_ATTEMPTS = 5
 
     def __init__(
@@ -22,6 +32,7 @@ class OutboxProcessor:
         outbox_model: type[OutboxMixin],
         batch_size: int = 20,
     ):
+        """Initializes the processor."""
         self._session_factory = session_factory
         self._event_bus = event_bus
         self._event_registry = event_registry
@@ -29,6 +40,11 @@ class OutboxProcessor:
         self._batch_size = batch_size
 
     async def _process_batch(self) -> int:
+        """Processes a single batch of pending events.
+
+        Returns:
+            int: Number of events processed (or attempted).
+        """
         async with self._session_factory() as session:
             stmt = (
                 select(self._outbox_model)
@@ -86,6 +102,11 @@ class OutboxProcessor:
             return len(records)
 
     async def run_forever(self, interval: float = 0.5) -> None:
+        """Runs the processor loop indefinitely.
+
+        Args:
+            interval: Sleep interval between batches when empty.
+        """
         logger.info("Outbox processor started")
         while True:
             count = await self._process_batch()
