@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 from users.application.commands.delete_user_by_id import (
-    DeleteUserByIdCommand,
-    DeleteUserByIdHandler,
+    DeleteUserProfileByIdCommand,
+    DeleteUserProfileByIdHandler,
 )
 from users.application.commands.update_user import UpdateUserCommand, UpdateUserHandler
 from users.application.uow import UsersUnitOfWork
@@ -25,13 +25,13 @@ class CommandHandlersContainer(containers.DeclarativeContainer):
 
     # --- Handler Factories ---
     update_user_handler = providers.Factory(UpdateUserHandler, uow=uow)
-    delete_user_by_id_handler = providers.Factory(DeleteUserByIdHandler, uow=uow)
+    delete_user_by_id_handler = providers.Factory(DeleteUserProfileByIdHandler, uow=uow)
 
     # --- Handlers Map
     handlers = providers.Dict(
         {
             UpdateUserCommand: update_user_handler,
-            DeleteUserByIdCommand: delete_user_by_id_handler,
+            DeleteUserProfileByIdCommand: delete_user_by_id_handler,
         }
     )
 

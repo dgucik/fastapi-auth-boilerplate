@@ -12,16 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class DeleteUserByIdCommand(Command):
+class DeleteUserProfileByIdCommand(Command):
     user_id: UUID
     is_superuser: bool
 
 
-class DeleteUserByIdHandler(Handler[DeleteUserByIdCommand, None]):
+class DeleteUserProfileByIdHandler(Handler[DeleteUserProfileByIdCommand, None]):
     def __init__(self, uow: UsersUnitOfWork) -> None:
         self._uow = uow
 
-    async def handle(self, command: DeleteUserByIdCommand) -> None:
+    async def handle(self, command: DeleteUserProfileByIdCommand) -> None:
         if not command.is_superuser:
             raise PermissionDeniedException
 
