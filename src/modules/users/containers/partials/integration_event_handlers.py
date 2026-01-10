@@ -56,13 +56,14 @@ class IntegrationEventHandlersContainer(containers.DeclarativeContainer):
     )
 
     # --- Handlers Map ---
-    event_map = providers.Dict(
-        {
+    event_map = providers.Callable(
+        lambda handler: {
             "AccountRegisteredIntegrationEvent": (
                 AccountRegisteredIntegrationEvent,
-                create_user_handler,
+                handler,
             )
-        }
+        },
+        handler=create_user_handler,
     )
 
     # --- Event Consumer ---

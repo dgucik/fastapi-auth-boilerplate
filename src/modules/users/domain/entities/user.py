@@ -15,3 +15,11 @@ class User(AggregateRoot):
     @classmethod
     def create(cls, id: UUID, account_id: UUID, username: Username) -> "User":
         return cls(id=id, account_id=account_id, username=username)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, User):
+            return False
+        return self.id == other.id
+
+    def __hash__(self) -> int:
+        return hash(self.id)

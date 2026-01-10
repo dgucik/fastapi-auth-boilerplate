@@ -20,7 +20,7 @@ class SqlAlchemyUsersUnitOfWork(BaseSqlAlchemyUnitOfWork, UsersUnitOfWork):
     async def __aenter__(self) -> "SqlAlchemyUsersUnitOfWork":
         await super().__aenter__()
         if self._session is not None:
-            self.accounts = SqlAlchemyUserRepository(self._session)
+            self.users = SqlAlchemyUserRepository(self._session)
         return self
 
     def _get_outbox_model(self) -> type[UsersOutboxEvent]:

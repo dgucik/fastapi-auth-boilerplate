@@ -19,7 +19,6 @@ class CreateUserHandler(IntegrationEventHandler[AccountRegisteredIntegrationEven
         self._service = service
 
     async def handle(self, event: AccountRegisteredIntegrationEvent) -> None:
-        print("\n\n HELLO \n\n", flush=True)
         user_id = uuid4()
         random_id = "".join(secrets.choice(string.digits) for _ in range(9))
         username = f"User_{random_id}"

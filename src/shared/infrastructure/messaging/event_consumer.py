@@ -70,13 +70,18 @@ class KafkaIntegrationEventConsumer(IntegrationEventConsumer):
             if event_type not in self._event_map:
                 return
 
-            event_class, handler_factory = self._event_map[event_type]
+            event_class, handler_provider = self._event_map[event_type]
             payload = json.loads(msg.value.decode("utf-8"))
             event_instance = event_class.from_dict(payload)
-            handler = handler_factory()
-            if inspect.isawaitable(handler):
-                handler = await handler
+
+            if callable(handler_provider):
+                handler = handler_provider()
+                if inspect.isawaitable(handler):
+                    handler = await handler
+            else:
+                handler = handler_provider
+
             await handler.handle(event_instance)
 
         except Exception as e:
-            logger.error(f"Error handling event {event_type}: {e}.")
+            logger.error(f"Error handling event {event_type}: {e}", exc_info=True)
