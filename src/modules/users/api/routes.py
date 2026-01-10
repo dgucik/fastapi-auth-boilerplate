@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, status
 from users.api.dependencies import get_current_account_from_header
 from users.api.responses import GetUserByIdResponse, MeResponse
 from users.api.schemas import UpdateMeRequest, UpdateUserIdRequest
+from users.application.commands.delete_user_by_id import DeleteUserByIdCommand
 from users.application.commands.update_user import UpdateUserCommand
 from users.application.queries.get_my_user_profile import GetMyUserProfileQuery
 from users.application.queries.get_user_profile_by_id import GetUserProfileByIdQuery
@@ -77,4 +78,15 @@ async def update_by_id(
         target_user_id=id,
         is_superuser=current_account.is_superuser,
     )
+    await command_bus.dispatch(cmd)
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def delete_by_id(
+    id: UUID,
+    current_account: AuthAccountDto = Depends(get_current_account_from_header),
+    command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
+) -> None:
+    cmd = DeleteUserByIdCommand(user_id=id, is_superuser=current_account.is_superuser)
     await command_bus.dispatch(cmd)

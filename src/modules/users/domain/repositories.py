@@ -28,5 +28,10 @@ class UserRepository(ABC):
 
     @abstractmethod
     async def update(self, user: User) -> None:
-        """Updates user data."""
+        """Updates user in repository."""
+        pass
+
+    @abstractmethod
+    async def delete(self, user: User) -> None:
+        "Deletes user from repository."
         pass

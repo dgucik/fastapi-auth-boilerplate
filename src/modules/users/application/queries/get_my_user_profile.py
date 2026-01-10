@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -6,6 +7,8 @@ from users.application.uow import UsersUnitOfWork
 from users.domain.exceptions import UserProfileNotFoundException
 
 from shared.application.ports import Handler, Query
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -24,6 +27,7 @@ class GetMyUserProfileHandler(Handler[GetMyUserProfileQuery, UserDto]):
             if not user:
                 raise UserProfileNotFoundException
 
+        logger.info("User profile read successfully.")
         return UserDto(
             id=user.id,
             username=user.username.value,

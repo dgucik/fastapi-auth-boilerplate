@@ -34,8 +34,13 @@ class SqlAlchemyUserRepository(UserRepository, BaseSqlAlchemyRepository[User]):
 
     async def update(self, user: User) -> None:
         self._register(user)
-        account_model = self._to_model(user)
-        await self._session.merge(account_model)
+        user_model = self._to_model(user)
+        await self._session.merge(user_model)
+
+    async def delete(self, user: User) -> None:
+        self._register(user)
+        user_model = self._to_model(user)
+        await self._session.delete(user_model)
 
     def _to_domain(self, user_model: UserModel) -> User:
         user = User(
