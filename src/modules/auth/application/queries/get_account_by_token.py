@@ -33,7 +33,8 @@ class GetAccountByTokenHandler(Handler[GetAccountByTokenQuery, AccountDto]):
         except InvalidTokenException as e:
             raise ContractInvalidTokenException from e
 
-        account = await self._uow.accounts.get_by_id(UUID(account_id))
+        async with self._uow:
+            account = await self._uow.accounts.get_by_id(UUID(account_id))
 
         if not account:
             raise ContractAccountNotFoundException
