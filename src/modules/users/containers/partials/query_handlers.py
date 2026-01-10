@@ -1,12 +1,5 @@
 from dependency_injector import containers, providers
-from users.application.queries.get_user_by_account_id import (
-    GetUserByAccountIdHandler,
-    GetUserByAccountIdQuery,
-)
-from users.application.queries.get_user_by_id import (
-    GetUserByIdHandler,
-    GetUserByIdQuery,
-)
+from users.application.queries.get_user import GetUserHandler, GetUserQuery
 from users.application.uow import UsersUnitOfWork
 
 from shared.infrastructure.cqrs.buses import QueryBus
@@ -26,19 +19,9 @@ class QueryHandlersContainer(containers.DeclarativeContainer):
     uow: providers.Dependency[UsersUnitOfWork] = providers.Dependency()
 
     # --- Handler Factories ---
-    get_user_by_account_id_handler = providers.Factory(
-        GetUserByAccountIdHandler, uow=uow
-    )
-
-    get_user_by_id_handler = providers.Factory(GetUserByIdHandler, uow=uow)
-
+    get_user_handler = providers.Factory(GetUserHandler, uow=uow)
     # --- Handlers Map ---
-    handlers = providers.Dict(
-        {
-            GetUserByAccountIdQuery: get_user_by_account_id_handler,
-            GetUserByIdQuery: get_user_by_id_handler,
-        }
-    )
+    handlers = providers.Dict({GetUserQuery: get_user_handler})
 
     # --- Bus ---
     bus = providers.Factory(QueryBus, handlers=handlers)

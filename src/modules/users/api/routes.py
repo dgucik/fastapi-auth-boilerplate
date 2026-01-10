@@ -7,8 +7,7 @@ from users.api.dependencies import get_current_account_from_header
 from users.api.responses import GetUserByIdResponse, MeResponse
 from users.api.schemas import UpdateMeRequest, UpdateUserIdRequest
 from users.application.commands.update_user import UpdateUserCommand
-from users.application.queries.get_user_by_account_id import GetUserByAccountIdQuery
-from users.application.queries.get_user_by_id import GetUserByIdQuery
+from users.application.queries.get_user import GetUserQuery
 from users.containers.users import UsersContainer
 
 from auth.contracts.dtos import AuthAccountDto
@@ -23,7 +22,7 @@ async def read_me(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     query_bus: QueryBus = Depends(Provide[UsersContainer.query_bus]),
 ) -> MeResponse:
-    query = GetUserByAccountIdQuery(account_id=current_account.id)
+    query = GetUserQuery(actor_account_id=current_account.id)
     result = await query_bus.dispatch(query)
     return MeResponse(
         id=result.id,
@@ -52,7 +51,11 @@ async def read_by_id(
     current_account: AuthAccountDto = Depends(get_current_account_from_header),
     query_bus: QueryBus = Depends(Provide[UsersContainer.query_bus]),
 ) -> GetUserByIdResponse:
-    query = GetUserByIdQuery(id=id, is_superuser=current_account.is_superuser)
+    query = GetUserQuery(
+        actor_account_id=current_account.id,
+        target_user_id=id,
+        is_superuser=current_account.is_superuser,
+    )
     result = await query_bus.dispatch(query)
     return GetUserByIdResponse(
         id=result.id,
