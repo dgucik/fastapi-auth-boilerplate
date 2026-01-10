@@ -1,11 +1,11 @@
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
+from typing import Any
 
 from dependency_injector import containers, providers
 from starlette import status
 from users.containers.users import UsersContainer
 
 from auth import AuthContainer
-from config.database import scoped_session_factory
 from shared.application.exceptions import (
     CommandHandlingException,
     EventReconstructionException,
@@ -78,7 +78,7 @@ async def init_event_producer(
 class AppContainer(containers.DeclarativeContainer):
     settings = providers.Configuration()
 
-    session_factory = providers.Singleton(lambda: scoped_session_factory)
+    session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()
 
     # --- Integration Events Publisher ----
     event_producer = providers.Resource(
