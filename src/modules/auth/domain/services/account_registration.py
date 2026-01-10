@@ -9,6 +9,8 @@ from auth.domain.value_objects.plain_password import PlainPassword
 
 
 class AccountRegistrationService:
+    """Domain service for account registration."""
+
     def __init__(self, hasher: PasswordHasher):
         self._hasher = hasher
 
@@ -19,6 +21,20 @@ class AccountRegistrationService:
         email: Email,
         password: PlainPassword,
     ) -> Account:
+        """Registers a new account.
+
+        Args:
+            repo: Account repository.
+            account_id: New account ID.
+            email: New account email.
+            password: New account password.
+
+        Returns:
+            The created Account entity.
+
+        Raises:
+            EmailAlreadyExistsException: If email is taken.
+        """
         if await repo.get_by_email(email):
             raise EmailAlreadyExistsException
 

@@ -6,6 +6,8 @@ from auth.infrastructure.services.token_manager import JWTTokenManager
 
 
 class InfraServicesContainer(containers.DeclarativeContainer):
+    """Container for infrastructure services."""
+
     settings = providers.Configuration()
 
     hasher = providers.Singleton(BcryptPasswordHasher)

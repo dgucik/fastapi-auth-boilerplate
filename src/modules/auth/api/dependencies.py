@@ -20,6 +20,16 @@ async def get_current_account(
     token_manager: TokenManager = Depends(Provide[AuthContainer.token_manager]),
     uow: AuthUnitOfWork = Depends(Provide[AuthContainer.uow]),
 ) -> Account:
+    """Retrieves the currently authenticated account via JWT.
+
+    Args:
+        token: OAuth2 access token.
+        token_manager: Service to decode/validate token.
+        uow: Unit of Work for database access.
+
+    Returns:
+        The authenticated Account entity.
+    """
     try:
         account_id_str = token_manager.decode_token(token, TokenScope.ACCESS)
         account_id = UUID(account_id_str)

@@ -15,6 +15,15 @@ logger = logging.getLogger(__name__)
 async def logging_middleware(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
+    """Middleware that logs exceptions.
+
+    Args:
+        request: The incoming request.
+        call_next: Function to call the next middleware/handler.
+
+    Returns:
+        The response from the next handler.
+    """
     try:
         response = await call_next(request)
         return response
@@ -29,6 +38,15 @@ async def logging_middleware(
 async def request_id_middleware(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
+    """Middleware that manages Request ID.
+
+    Args:
+        request: The incoming request.
+        call_next: Function to call the next middleware/handler.
+
+    Returns:
+        The response with X-Request-ID header.
+    """
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     token = request_id_var.set(request_id)
     try:
@@ -42,6 +60,15 @@ async def request_id_middleware(
 async def db_session_middleware(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
+    """Middleware that manages database session scope.
+
+    Args:
+        request: The incoming request.
+        call_next: Function to call the next middleware/handler.
+
+    Returns:
+        The response from the next handler.
+    """
     try:
         response = await call_next(request)
         logger.debug(

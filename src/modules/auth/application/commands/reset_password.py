@@ -16,12 +16,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class ResetPasswordCommand(Command):
+    """Command to reset password using a token."""
+
     token: str
     new_password: str
     confirm_new_password: str
 
 
 class ResetPasswordHandler(Handler[ResetPasswordCommand, None]):
+    """Handler for ResetPasswordCommand."""
+
     def __init__(
         self, uow: AuthUnitOfWork, token_manager: TokenManager, hasher: PasswordHasher
     ):
@@ -30,6 +34,15 @@ class ResetPasswordHandler(Handler[ResetPasswordCommand, None]):
         self._hasher = hasher
 
     async def handle(self, command: ResetPasswordCommand) -> None:
+        """Processes the password reset command.
+
+        Args:
+            command: The command data.
+
+        Raises:
+            PasswordsDoNotMatchException: If new passwords do not match.
+            AccountDoesNotExistException: If account is not found.
+        """
         if command.new_password != command.confirm_new_password:
             raise PasswordsDoNotMatchException
 

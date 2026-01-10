@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class SendVerificationMailHandler(DomainEventHandler[VerificationRequestedDomainEvent]):
+    """Handles VerificationRequestedDomainEvent and sends email."""
+
     def __init__(self, mail_sender: MailSender, base_url: str) -> None:
         self._mail_sender = mail_sender
         self._base_url = base_url

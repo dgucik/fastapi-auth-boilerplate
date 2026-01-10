@@ -23,6 +23,15 @@ from shared.domain.primitives import AggregateRoot
 
 @dataclass
 class Account(AggregateRoot):
+    """Account domain entity representing a user.
+
+    Attributes:
+        email: User's email address.
+        id: Unique identifier.
+        is_verified: Whether email is verified.
+        is_superuser: Whether user has admin privileges.
+    """
+
     email: Email
     id: UUID
     _password_hash: str = field(default="", repr=False)
@@ -37,6 +46,17 @@ class Account(AggregateRoot):
         plain_password: PlainPassword,
         hasher: PasswordHasher,
     ) -> "Account":
+        """Factory method to create a new Account.
+
+        Args:
+            id: Unique identifier.
+            email: Email address.
+            plain_password: Password to set.
+            hasher: Service to hash the password.
+
+        Returns:
+            New Account instance.
+        """
         new_account = cls(id=id, email=email)
         new_account.set_password(plain_password, hasher)
 
@@ -51,9 +71,25 @@ class Account(AggregateRoot):
     def set_password(
         self, plain_password: PlainPassword, hasher: PasswordHasher
     ) -> None:
+        """Sets the account password.
+
+        Args:
+            plain_password: New password.
+            hasher: Hashing service.
+        """
         self._password_hash = hasher.hash(plain_password.value)
 
     def login(self, plain_password: PlainPassword, hasher: PasswordHasher) -> None:
+        """Authenticates the user.
+
+        Args:
+            plain_password: Password attempt.
+            hasher: Hashing service for verification.
+
+        Raises:
+            InvalidPasswordException: If password doesn't match.
+            AccountNotVerifiedException: If account is not verified.
+        """
         if not hasher.verify(plain_password.value, self._password_hash):
             raise InvalidPasswordException
 
@@ -61,11 +97,24 @@ class Account(AggregateRoot):
             raise AccountNotVerifiedException
 
     def verify_email(self) -> None:
+        """Marks the email as verified.
+
+        Raises:
+            AccountAlreadyVerifiedException: If already verified.
+        """
         if self.is_verified:
             raise AccountAlreadyVerifiedException()
         self.is_verified = True
 
     def request_verification(self, token: str) -> None:
+        """Initiates email verification process.
+
+        Args:
+            token: Verification token to send.
+
+        Raises:
+            AccountAlreadyVerifiedException: If already verified.
+        """
         if self.is_verified:
             raise AccountAlreadyVerifiedException()
         self.add_event(
@@ -75,6 +124,11 @@ class Account(AggregateRoot):
         )
 
     def request_password_reset(self, token: str) -> None:
+        """Initiates password reset process.
+
+        Args:
+            token: Reset token to send.
+        """
         self.add_event(
             PasswordResetRequestedDomainEvent(
                 account_id=self.id, email=self.email, token=token
@@ -84,6 +138,12 @@ class Account(AggregateRoot):
     def reset_password(
         self, new_password: PlainPassword, hasher: PasswordHasher
     ) -> None:
+        """Resets the password.
+
+        Args:
+            new_password: New password.
+            hasher: Hashing service.
+        """
         self.set_password(new_password, hasher)
         self.add_event(PasswordResetCompletedDomainEvent(account_id=self.id))
 
@@ -93,6 +153,16 @@ class Account(AggregateRoot):
         new_password: PlainPassword,
         hasher: PasswordHasher,
     ) -> None:
+        """Changes the password.
+
+        Args:
+            old_password: Current password.
+            new_password: New password.
+            hasher: Hashing service.
+
+        Raises:
+            InvalidPasswordException: If old password is incorrect.
+        """
         if not hasher.verify(old_password.value, self._password_hash):
             raise InvalidPasswordException()
 

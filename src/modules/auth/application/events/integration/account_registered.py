@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class AccountRegisteredIntegrationHandler(
     DomainEventHandler[AccountRegisteredDomainEvent]
 ):
+    """Handles AccountRegisteredDomainEvent and publishes integration event."""
+
     def __init__(self, producer: IntegrationEventProducer):
         self._producer = producer
 

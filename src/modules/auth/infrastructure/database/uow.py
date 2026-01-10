@@ -9,6 +9,8 @@ from shared.infrastructure.database.base_uow import BaseSqlAlchemyUnitOfWork
 
 
 class SqlAlchemyAuthUnitOfWork(BaseSqlAlchemyUnitOfWork, AuthUnitOfWork):
+    """SQLAlchemy implementation of the Auth Unit of Work."""
+
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],

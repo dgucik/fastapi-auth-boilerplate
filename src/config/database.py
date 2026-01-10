@@ -33,9 +33,12 @@ scoped_session_factory = async_scoped_session(
 
 # Base class for ORM models
 class Base(AsyncAttrs, DeclarativeBase):
+    """Base class for SQLAlchemy ORM models."""
+
     pass
 
 
 # Function to close the database connection
 async def close_db_connection() -> None:
+    """Closes the database engine connection."""
     await engine.dispose()

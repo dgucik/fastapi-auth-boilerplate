@@ -9,10 +9,14 @@ from shared.application.ports import Handler, Query
 
 @dataclass(frozen=True)
 class GetAccountByIdQuery(Query):
+    """Query to retrieve an account by ID."""
+
     account_id: UUID
 
 
 class GetAccountByIdHandler(Handler[GetAccountByIdQuery, AccountDto]):
+    """Handler for GetAccountByIdQuery."""
+
     def __init__(self, uow: AuthUnitOfWork):
         self._uow = uow
 

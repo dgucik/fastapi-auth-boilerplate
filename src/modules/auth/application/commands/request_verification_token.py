@@ -12,15 +12,27 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class RequestVerificationTokenCommand(Command):
+    """Command to request a verification token."""
+
     email: str
 
 
 class RequestVerificationTokenHandler(Handler[RequestVerificationTokenCommand, None]):
+    """Handler for RequestVerificationTokenCommand."""
+
     def __init__(self, uow: AuthUnitOfWork, token_manager: TokenManager):
         self._uow = uow
         self._token_manager = token_manager
 
     async def handle(self, command: RequestVerificationTokenCommand) -> None:
+        """Processes the verification token request command.
+
+        Args:
+            command: The command data.
+
+        Raises:
+            AccountDoesNotExistException: If account is not found.
+        """
         email_vo = Email(value=command.email)
 
         async with self._uow:

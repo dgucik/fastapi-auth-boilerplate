@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 class SendPasswordResetMailHandler(
     DomainEventHandler[PasswordResetRequestedDomainEvent]
 ):
+    """Handles PasswordResetRequestedDomainEvent and sends email."""
+
     def __init__(self, command_bus: MailSender, base_url: str) -> None:
         self._mail_sender = command_bus
         self._base_url = base_url

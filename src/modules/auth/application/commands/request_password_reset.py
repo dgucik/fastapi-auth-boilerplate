@@ -12,15 +12,27 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class RequestPasswordResetCommand(Command):
+    """Command to request a password reset."""
+
     email: str
 
 
 class RequestPasswordResetHandler(Handler[RequestPasswordResetCommand, None]):
+    """Handler for RequestPasswordResetCommand."""
+
     def __init__(self, uow: AuthUnitOfWork, token_manager: TokenManager) -> None:
         self._uow = uow
         self._token_manager = token_manager
 
     async def handle(self, command: RequestPasswordResetCommand) -> None:
+        """Processes the password reset request command.
+
+        Args:
+            command: The command data.
+
+        Raises:
+            AccountDoesNotExistException: If account is not found.
+        """
         email_vo = Email(command.email)
 
         async with self._uow:
