@@ -31,7 +31,7 @@ from auth.domain.entities.account import Account
 from shared.api.responses import MessageResponse
 from shared.infrastructure.cqrs.buses import CommandBus
 
-router = APIRouter(tags=["Auth"])
+router = APIRouter(tags=["Auth v1"])
 
 
 @router.post(

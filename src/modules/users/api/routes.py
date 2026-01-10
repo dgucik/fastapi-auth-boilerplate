@@ -10,7 +10,7 @@ from users.containers.users import UsersContainer
 from auth.contracts.dtos import AuthAccountDto
 from shared.infrastructure.cqrs.buses import QueryBus
 
-router = APIRouter(tags=["Users"])
+router = APIRouter(tags=["Users v1"])
 
 
 @router.get("/me")
