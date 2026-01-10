@@ -8,3 +8,4 @@ from shared.application.ports import Dto
 class AccountDto(Dto):
     id: UUID
     email: str
+    is_superuser: bool

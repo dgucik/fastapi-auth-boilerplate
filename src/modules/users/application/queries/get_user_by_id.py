@@ -8,32 +8,28 @@ from shared.application.ports import Handler, Query
 
 
 @dataclass(frozen=True)
-class GetUserByAccountIdQuery(Query):
-    account_id: UUID
+class GetUserByIdQuery(Query):
+    id: UUID
 
 
 @dataclass(frozen=True)
-class GetUserByAccountIdDto:
+class GetUserByIdDto:
     id: UUID
     username: str
 
 
-class GetUserByAccountIdHandler(
-    Handler[GetUserByAccountIdQuery, GetUserByAccountIdDto]
-):
+class GetUserByIdHandler(Handler[GetUserByIdQuery, GetUserByIdDto]):
     def __init__(self, uow: UsersUnitOfWork) -> None:
         self._uow = uow
 
-    async def handle(self, query: GetUserByAccountIdQuery) -> GetUserByAccountIdDto:
+    async def handle(self, query: GetUserByIdQuery) -> GetUserByIdDto:
         async with self._uow:
-            user = await self._uow.users.get_by_account_id(query.account_id)
+            user = await self._uow.users.get_by_id(query.id)
 
         if not user:
-            raise UserProfileNotFoundException(
-                f"User for account id {query.account_id} not found."
-            )
+            raise UserProfileNotFoundException(f"User for id {query.id} not found.")
 
-        return GetUserByAccountIdDto(
+        return GetUserByIdDto(
             id=user.id,
             username=user.username.value,
         )

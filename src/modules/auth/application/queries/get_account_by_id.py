@@ -23,4 +23,6 @@ class GetAccountByIdHandler(Handler[GetAccountByIdQuery, AccountDto]):
         if not account:
             raise ContractAccountNotFoundException
 
-        return AccountDto(id=account.id, email=account.email.value)
+        return AccountDto(
+            id=account.id, email=account.email.value, is_superuser=account.is_superuser
+        )

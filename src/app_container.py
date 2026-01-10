@@ -27,6 +27,7 @@ from shared.infrastructure.exceptions.exception_registry import (
 from shared.infrastructure.exceptions.exceptions import (
     DatabaseConnectionException,
     ExternalServiceException,
+    PermissionDeniedException,
 )
 from shared.infrastructure.messaging.event_producer import (
     KafkaIntegrationEventProducer,
@@ -62,6 +63,9 @@ SHARED_EXCEPTION_MAPPINGS = {
     ),
     ExternalServiceException: ExceptionMetadata(
         status.HTTP_503_SERVICE_UNAVAILABLE, "external_service_error"
+    ),
+    PermissionDeniedException: ExceptionMetadata(
+        status.HTTP_403_FORBIDDEN, "permission_denied"
     ),
 }
 

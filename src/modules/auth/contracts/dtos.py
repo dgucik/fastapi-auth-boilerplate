@@ -6,3 +6,4 @@ from uuid import UUID
 class AuthAccountDto:
     id: UUID
     email: str
+    is_superuser: bool

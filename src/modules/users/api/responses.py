@@ -7,3 +7,8 @@ class MeResponse(BaseModel):
     id: UUID
     email: str
     username: str
+
+
+class GetUserByIdResponse(BaseModel):
+    id: UUID
+    username: str

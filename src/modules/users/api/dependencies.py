@@ -12,7 +12,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/login")
 
 
 @inject
-async def get_current_account_via_contract(
+async def get_current_account_from_header(
     token: str = Depends(oauth2_scheme),
     contract: AuthModulePort = Depends(Provide[UsersContainer.auth_contract]),
 ) -> AuthAccountDto:
