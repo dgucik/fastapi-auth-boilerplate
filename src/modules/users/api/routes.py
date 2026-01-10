@@ -4,7 +4,6 @@ from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status
 from users.api.dependencies import get_current_account_from_header
-from users.api.permissions import require_superuser
 from users.api.responses import GetUserByIdResponse, MeResponse
 from users.api.schemas import UpdateMeRequest
 from users.application.commands.update_user import UpdateUserCommand
@@ -48,12 +47,23 @@ async def update_me(
 @inject
 async def read_by_id(
     id: UUID,
-    _: AuthAccountDto = Depends(require_superuser()),
+    current_account: AuthAccountDto = Depends(get_current_account_from_header),
     query_bus: QueryBus = Depends(Provide[UsersContainer.query_bus]),
 ) -> GetUserByIdResponse:
-    query = GetUserByIdQuery(id=id)
+    query = GetUserByIdQuery(id=id, is_superuser=current_account.is_superuser)
     result = await query_bus.dispatch(query)
     return GetUserByIdResponse(
         id=result.id,
         username=result.username,
     )
+
+
+# @router.get("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+# @inject
+# async def update_by_id(
+#     id: UUID,
+#     _: AuthAccountDto = Depends(require_superuser()),
+#     command_bus: CommandBus = Depends(Provide[UsersContainer.command_bus]),
+# ) -> None:
+#     cmd = None
+#     await command_bus.dispatch(cmd)

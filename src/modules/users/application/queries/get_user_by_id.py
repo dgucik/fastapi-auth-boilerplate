@@ -5,11 +5,13 @@ from users.application.uow import UsersUnitOfWork
 from users.domain.exceptions import UserProfileNotFoundException
 
 from shared.application.ports import Handler, Query
+from shared.infrastructure.exceptions.exceptions import PermissionDeniedException
 
 
 @dataclass(frozen=True)
 class GetUserByIdQuery(Query):
     id: UUID
+    is_superuser: bool
 
 
 @dataclass(frozen=True)
@@ -23,6 +25,9 @@ class GetUserByIdHandler(Handler[GetUserByIdQuery, GetUserByIdDto]):
         self._uow = uow
 
     async def handle(self, query: GetUserByIdQuery) -> GetUserByIdDto:
+        if not query.is_superuser:
+            raise PermissionDeniedException
+
         async with self._uow:
             user = await self._uow.users.get_by_id(query.id)
 
