@@ -30,6 +30,15 @@ async def init_outbox_processor(
     outbox_model: type[OutboxMixin],
     batch_size: int,
 ) -> AsyncGenerator[None, None]:
+    """Initializes and runs the outbox processor task.
+
+    Args:
+        session_factory: Factory for DB sessions.
+        event_bus: Bus to publish events to.
+        event_registry: Registry of event types.
+        outbox_model: ORM model for outbox table.
+        batch_size: Number of messages to process at once.
+    """
     processor = OutboxProcessor(
         session_factory=session_factory,
         event_bus=event_bus,
@@ -49,6 +58,8 @@ async def init_outbox_processor(
 
 
 class AuthContainer(containers.DeclarativeContainer):
+    """Dependency Injection Container for the Auth module."""
+
     # --- Dependencies ---
     event_producer: providers.Dependency[IntegrationEventProducer] = (
         providers.Dependency()

@@ -6,6 +6,8 @@ from auth.domain.value_objects.plain_password import PlainPassword
 
 
 class AccountAuthenticationService:
+    """Domain service for account authentication."""
+
     def __init__(self, hasher: PasswordHasher, token_manager: TokenManager) -> None:
         self._hasher = hasher
         self._token_manager = token_manager
@@ -13,6 +15,19 @@ class AccountAuthenticationService:
     async def authenticate(
         self, repo: AccountRepository, email: Email, plain_password: PlainPassword
     ) -> AuthenticationResult:
+        """Authenticates user against the repository.
+
+        Args:
+            repo: Account repository.
+            email: Account email.
+            plain_password: Password attempt.
+
+        Returns:
+            Authentication tokens.
+
+        Raises:
+            InvalidPasswordException: If credentials are invalid.
+        """
         account = await repo.get_by_email(email)
 
         if not account:

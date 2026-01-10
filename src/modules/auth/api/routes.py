@@ -42,6 +42,15 @@ async def register(
     request: RegisterRequest,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_handlers.bus]),
 ) -> RegisterResponse:
+    """Registers a new account.
+
+    Args:
+        request: Registration details.
+        command_bus: Command bus to dispatch RegisterCommand.
+
+    Returns:
+        ID of the newly created account.
+    """
     cmd = RegisterCommand(
         email=request.email,
         password=request.password,
@@ -59,6 +68,16 @@ async def login(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> LoginResponse:
+    """Authenticates a user and returns tokens.
+
+    Args:
+        request: Login credentials.
+        response: HTTP response to set cookies.
+        command_bus: Command bus to dispatch LoginCommand.
+
+    Returns:
+        Access and refresh tokens.
+    """
     cmd = LoginCommand(email=request.email, password=request.password)
 
     result: LoginDto = await command_bus.dispatch(cmd)  # type: ignore
@@ -89,6 +108,16 @@ async def refresh_token(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> RefreshTokenResponse:
+    """Refreshes access token using a refresh token.
+
+    Args:
+        request: Request containing refresh token.
+        response: HTTP response to set cookies.
+        command_bus: Command bus to dispatch RefreshTokenCommand.
+
+    Returns:
+        New access and refresh tokens.
+    """
     cmd = RefreshTokenCommand(refresh_token=request.refresh_token)
     result: RefreshTokenDto = await command_bus.dispatch(cmd)  # type: ignore
     response.set_cookie(
@@ -115,6 +144,15 @@ async def refresh_token(
 async def logout(
     response: Response, current_account: Account = Depends(get_current_account)
 ) -> MessageResponse:
+    """Logs out the user by clearing cookies.
+
+    Args:
+        response: HTTP response to clear cookies.
+        current_account: The authenticated user.
+
+    Returns:
+        Success message.
+    """
     response.delete_cookie(
         key="refresh_token",
         httponly=True,
@@ -135,6 +173,16 @@ async def request_verification_token(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> MessageResponse:
+    """Requests a new email verification token.
+
+    Args:
+        request: Request containing email.
+        response: HTTP response.
+        command_bus: Command bus to dispatch command.
+
+    Returns:
+        Success message.
+    """
     cmd = RequestVerificationTokenCommand(email=request.email)
 
     await command_bus.dispatch(cmd)
@@ -153,6 +201,16 @@ async def verify_email(
     response: Response,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> MessageResponse:
+    """Verifies an email address using a token.
+
+    Args:
+        request: Request containing verification token.
+        response: HTTP response.
+        command_bus: Command bus to dispatch command.
+
+    Returns:
+        Success message.
+    """
     cmd = VerifyEmailCommand(token=request.token)
 
     await command_bus.dispatch(cmd)
@@ -170,6 +228,15 @@ async def request_password_reset(
     request: RequestPasswordResetRequest,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> MessageResponse:
+    """Requests a password reset link.
+
+    Args:
+        request: Request containing email.
+        command_bus: Command bus to dispatch command.
+
+    Returns:
+        Message indicating request was processed.
+    """
     cmd = RequestPasswordResetCommand(email=request.email)
 
     try:
@@ -190,6 +257,15 @@ async def reset_password(
     request: ResetPasswordRequest,
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
 ) -> MessageResponse:
+    """Resets password using a token.
+
+    Args:
+        request: Request containing token and new password.
+        command_bus: Command bus to dispatch command.
+
+    Returns:
+        Success message.
+    """
     cmd = ResetPasswordCommand(
         token=request.token,
         new_password=request.new_password,
@@ -212,6 +288,16 @@ async def change_password(
     command_bus: CommandBus = Depends(Provide[AuthContainer.command_bus]),
     current_account: Account = Depends(get_current_account),
 ) -> MessageResponse:
+    """Changes the password for the authenticated user.
+
+    Args:
+        request: Request containing old and new passwords.
+        command_bus: Command bus to dispatch command.
+        current_account: The authenticated user.
+
+    Returns:
+        Success message.
+    """
     cmd = ChangePasswordCommand(
         account_id=current_account.id,
         old_password=request.old_password,

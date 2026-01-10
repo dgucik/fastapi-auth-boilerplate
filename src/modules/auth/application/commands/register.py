@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class RegisterCommand(Command):
+    """Command to register a new account."""
+
     email: str
     password: str
     confirm_password: str
@@ -22,6 +24,8 @@ class RegisterCommand(Command):
 
 
 class RegisterHandler(Handler[RegisterCommand, None]):
+    """Handler for RegisterCommand."""
+
     def __init__(
         self,
         uow: AuthUnitOfWork,
@@ -33,6 +37,14 @@ class RegisterHandler(Handler[RegisterCommand, None]):
         self._token_manager = token_manager
 
     async def handle(self, command: RegisterCommand) -> None:
+        """Processes the registration command.
+
+        Args:
+            command: The command data.
+
+        Raises:
+            PasswordsDoNotMatchException: If passwords do not match.
+        """
         if command.password != command.confirm_password:
             raise PasswordsDoNotMatchException
 

@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class JWTTokenManager(TokenManager):
+    """JWT-based implementation of TokenManager."""
+
     def __init__(
         self,
         secret_key: str,
@@ -31,6 +33,7 @@ class JWTTokenManager(TokenManager):
         self.password_reset_expire_minutes = password_reset_expire_minutes
 
     def issue_auth_tokens(self, subject: str) -> AuthenticationResult:
+        """Issues access and refresh JWTs."""
         access_token = self.create_access_token(subject)
         refresh_token = self.create_refresh_token(subject)
         refresh_token_expires_in_seconds = self.refresh_token_expires_in_seconds
@@ -41,6 +44,7 @@ class JWTTokenManager(TokenManager):
         )
 
     def create_access_token(self, subject: str) -> str:
+        """Creates a JWT access token."""
         return self._create_token(
             subject=subject,
             expires_delta=timedelta(minutes=self.access_expire_minutes),
@@ -48,6 +52,7 @@ class JWTTokenManager(TokenManager):
         )
 
     def create_refresh_token(self, subject: str) -> str:
+        """Creates a JWT refresh token."""
         return self._create_token(
             subject=subject,
             expires_delta=timedelta(days=self.refresh_expire_days),
@@ -55,6 +60,7 @@ class JWTTokenManager(TokenManager):
         )
 
     def create_verification_token(self, subject: str) -> str:
+        """Creates a JWT verification token."""
         return self._create_token(
             subject=subject,
             expires_delta=timedelta(minutes=self.verification_expire_minutes),
@@ -62,6 +68,7 @@ class JWTTokenManager(TokenManager):
         )
 
     def create_password_reset_token(self, subject: str) -> str:
+        """Creates a JWT password reset token."""
         return self._create_token(
             subject=subject,
             expires_delta=timedelta(minutes=self.password_reset_expire_minutes),
@@ -78,6 +85,19 @@ class JWTTokenManager(TokenManager):
         return str(encoded_jwt)
 
     def decode_token(self, token: str, expected_type: TokenScope) -> str:
+        """Decodes and validates a JWT token.
+
+        Args:
+            token: The JWT string.
+            expected_type: The expected scope/type of the token.
+
+        Returns:
+            The subject (user ID) from the token.
+
+        Raises:
+            InvalidTokenException: If token is invalid or type mismatch.
+            TokenExpiredException: If token has expired.
+        """
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
 

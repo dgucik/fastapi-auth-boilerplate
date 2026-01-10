@@ -15,10 +15,14 @@ from shared.application.ports import Handler, Query
 
 @dataclass(frozen=True)
 class GetAccountByTokenQuery(Query):
+    """Query to retrieve an account by access token."""
+
     token: str
 
 
 class GetAccountByTokenHandler(Handler[GetAccountByTokenQuery, AccountDto]):
+    """Handler for GetAccountByTokenQuery."""
+
     def __init__(self, uow: AuthUnitOfWork, token_manager: TokenManager):
         self._uow = uow
         self._token_manager = token_manager

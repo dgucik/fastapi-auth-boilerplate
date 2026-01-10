@@ -8,6 +8,8 @@ from shared.domain.primitives import ValueObject
 
 @dataclass(frozen=True)
 class Email(ValueObject):
+    """Value object representing an email address."""
+
     value: str
 
     def __post_init__(self) -> None:

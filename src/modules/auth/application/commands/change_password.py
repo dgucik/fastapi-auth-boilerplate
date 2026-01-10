@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class ChangePasswordCommand(Command):
+    """Command to change user password."""
+
     account_id: UUID
     old_password: str
     new_password: str
@@ -24,11 +26,23 @@ class ChangePasswordCommand(Command):
 
 
 class ChangePasswordHandler(Handler[ChangePasswordCommand, None]):
+    """Handler for ChangePasswordCommand."""
+
     def __init__(self, uow: AuthUnitOfWork, hasher: PasswordHasher):
         self._uow = uow
         self._hasher = hasher
 
     async def handle(self, command: ChangePasswordCommand) -> None:
+        """Processes the password change command.
+
+        Args:
+            command: The command data.
+
+        Raises:
+            PasswordMustBeDifferentException: If old and new passwords match.
+            PasswordsDoNotMatchException: If new password and confirmation do not match.
+            AccountDoesNotExistException: If account is not found.
+        """
         if command.old_password == command.new_password:
             raise PasswordMustBeDifferentException
 

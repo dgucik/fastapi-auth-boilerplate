@@ -9,6 +9,8 @@ from shared.infrastructure.outbox.mixin import OutboxMixin
 
 
 class AccountModel(Base):
+    """SQLAlchemy model for the accounts table."""
+
     __tablename__ = "accounts"
     __table_args__ = {"extend_existing": True}
 
@@ -20,4 +22,6 @@ class AccountModel(Base):
 
 
 class AuthOutboxEvent(Base, OutboxMixin):
+    """SQLAlchemy model for the auth outbox events table."""
+
     __tablename__ = "auth_outbox_events"

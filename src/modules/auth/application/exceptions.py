@@ -16,6 +16,8 @@ class AccountDoesNotExistException(CommandHandlingException):
 
 
 class PasswordMustBeDifferentException(CommandHandlingException):
+    """Exception raised when new password matches the old one."""
+
     def __init__(
         self, message: str = "New password must be different from the old password."
     ):

@@ -16,23 +16,43 @@ logger = logging.getLogger(__name__)
 
 
 def create_container() -> AppContainer:
+    """Creates and configures the DI container.
+
+    Returns:
+        Configured AppContainer instance.
+    """
     container = AppContainer(session_factory=scoped_session_factory)
     container.settings.from_pydantic(settings)
     return container
 
 
 def wire_container(container: AppContainer) -> None:
+    """Wires the DI container to modules.
+
+    Args:
+        container: The application container.
+    """
     container.auth().wire(modules=auth_routes)
     container.users().wire(modules=users_routes)
 
 
 def setup_middlewares(app: FastAPI) -> None:
+    """Configures middlewares for the FastAPI app.
+
+    Args:
+        app: The FastAPI application instance.
+    """
     app.middleware("http")(db_session_middleware)
     app.middleware("http")(logging_middleware)
     app.middleware("http")(request_id_middleware)
 
 
 def setup_routers(app: FastAPI) -> None:
+    """Registers API routers to the FastAPI app.
+
+    Args:
+        app: The FastAPI application instance.
+    """
     app.include_router(auth_router, prefix="/v1/auth")
     app.include_router(users_router, prefix="/v1/users")
 
@@ -41,12 +61,23 @@ def setup_exc_handlers(
     app: FastAPI,
     container: AppContainer,
 ) -> None:
+    """Configures global exception handlers.
+
+    Args:
+        app: The FastAPI application instance.
+        container: The application container.
+    """
     exc_handler = container.exc_handler()
     app.add_exception_handler(Exception, exc_handler)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Manages the application lifespan (startup/shutdown).
+
+    Args:
+        app: The FastAPI application instance.
+    """
     logger.info("Starting application...")
     container: AppContainer = app.state.container
 
@@ -63,6 +94,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
+    """Creates and configures the FastAPI application.
+
+    Returns:
+        Configured FastAPI application instance.
+    """
     setup_logging(settings.LOG_LEVEL)
 
     container = create_container()

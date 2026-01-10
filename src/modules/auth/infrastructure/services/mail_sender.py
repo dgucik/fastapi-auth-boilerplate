@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class AioSmtpMailSender(MailSender):
+    """SMTP-based implementation of MailSender."""
+
     def __init__(self, config: MailSettings | dict[str, Any]) -> None:
         if isinstance(config, dict):
             self._config = MailSettings(**config)
@@ -33,6 +35,14 @@ class AioSmtpMailSender(MailSender):
     async def send(
         self, recipient: str, subject: str, template_name: str, context: dict[str, Any]
     ) -> None:
+        """Sends an email using the configured SMTP server.
+
+        Args:
+            recipient: The email address of the recipient.
+            subject: The subject line of the email.
+            template_name: The name of the template to use.
+            context: Variables to render the template with.
+        """
         template = self._jinja_env.get_template(template_name)
 
         html_content = template.render(**context)

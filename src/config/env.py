@@ -5,10 +5,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class KafkaSettings(BaseModel):
+    """Configuration settings for Kafka."""
+
     BOOTSTRAP_SERVERS: str
 
 
 class MailSettings(BaseModel):
+    """Configuration settings for Email service."""
+
     USERNAME: str
     PASSWORD: str
     FROM: str
@@ -20,6 +24,8 @@ class MailSettings(BaseModel):
 
 
 class DatabaseSettings(BaseModel):
+    """Configuration settings for Database."""
+
     USER: str
     PASSWORD: str
     HOST: str
@@ -38,6 +44,8 @@ class DatabaseSettings(BaseModel):
 
 
 class TokenSettings(BaseModel):
+    """Configuration settings for JWT tokens."""
+
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
@@ -47,6 +55,8 @@ class TokenSettings(BaseModel):
 
 
 class Settings(BaseSettings):
+    """Main application configuration settings."""
+
     LOG_LEVEL: str = "INFO"
     APP_BASE_URL: str
     DB_ECHO: bool = False
@@ -67,6 +77,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    """Returns cached application settings."""
     return Settings()
 
 

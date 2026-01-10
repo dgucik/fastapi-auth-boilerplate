@@ -9,6 +9,8 @@ from shared.infrastructure.cqrs.buses import QueryBus
 
 
 class AuthModuleAdapter(AuthModulePort):
+    """Adapter for interacting with the Auth module via contract."""
+
     def __init__(self, query_bus: QueryBus):
         self._query_bus = query_bus
 

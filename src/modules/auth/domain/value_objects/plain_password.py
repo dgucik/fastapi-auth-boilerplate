@@ -6,6 +6,8 @@ from shared.domain.primitives import ValueObject
 
 @dataclass(frozen=True)
 class PlainPassword(ValueObject):
+    """Value object representing a plain text password (validated)."""
+
     value: str
 
     def __post_init__(self) -> None:

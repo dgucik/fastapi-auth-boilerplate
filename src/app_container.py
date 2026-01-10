@@ -73,6 +73,14 @@ SHARED_EXCEPTION_MAPPINGS = {
 async def init_event_producer(
     bootstrap_servers: str,
 ) -> AsyncGenerator[IntegrationEventProducer, None]:
+    """Initializes and yields a Kafka event producer.
+
+    Args:
+        bootstrap_servers: Kafka bootstrap servers string.
+
+    Yields:
+        Initialized KafkaIntegrationEventProducer.
+    """
     producer = KafkaIntegrationEventProducer(bootstrap_servers=bootstrap_servers)
     await producer.start()
     yield producer
@@ -80,6 +88,11 @@ async def init_event_producer(
 
 
 class AppContainer(containers.DeclarativeContainer):
+    """Dependency Injection Container for the application.
+
+    Manages dependencies and configuration.
+    """
+
     settings = providers.Configuration()
 
     session_factory: providers.Provider[Callable[..., Any]] = providers.Dependency()

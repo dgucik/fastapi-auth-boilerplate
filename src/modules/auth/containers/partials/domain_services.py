@@ -5,6 +5,8 @@ from auth.domain.services.account_registration import AccountRegistrationService
 
 
 class DomainServicesContainer(containers.DeclarativeContainer):
+    """Container for domain services."""
+
     # --- Dependencies ---
     infra_services = providers.DependenciesContainer()
 
