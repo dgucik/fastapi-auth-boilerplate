@@ -25,3 +25,8 @@ class UserRepository(ABC):
     async def add(self, user: User) -> None:
         """Add a new user to the repository."""
         pass
+
+    @abstractmethod
+    async def update(self, user: User) -> None:
+        """Updates user data."""
+        pass

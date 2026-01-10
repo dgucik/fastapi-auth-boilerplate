@@ -29,12 +29,13 @@ class SqlAlchemyUserRepository(UserRepository, BaseSqlAlchemyRepository[User]):
 
     async def add(self, user: User) -> None:
         self._register(user)
-        user_model = UserModel(
-            id=user.id,
-            account_id=user.account_id,
-            username=user.username.value,
-        )
+        user_model = self._to_model(user)
         self._session.add(user_model)
+
+    async def update(self, user: User) -> None:
+        self._register(user)
+        account_model = self._to_model(user)
+        await self._session.merge(account_model)
 
     def _to_domain(self, user_model: UserModel) -> User:
         user = User(
@@ -43,6 +44,13 @@ class SqlAlchemyUserRepository(UserRepository, BaseSqlAlchemyRepository[User]):
             username=Username(user_model.username),
         )
         return self._register(user)
+
+    def _to_model(self, user: User) -> UserModel:
+        return UserModel(
+            id=user.id,
+            account_id=user.account_id,
+            username=user.username.value,
+        )
 
     async def _execute(self, stmt: Select[Any]) -> User | None:
         result: Result[Any] = await self._session.execute(stmt)

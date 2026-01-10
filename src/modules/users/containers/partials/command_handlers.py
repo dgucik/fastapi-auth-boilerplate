@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from users.application.commands.update_user import UpdateUserCommand, UpdateUserHandler
 from users.application.uow import UsersUnitOfWork
 
 from shared.infrastructure.cqrs.buses import CommandBus
@@ -19,9 +20,10 @@ class CommandHandlersContainer(containers.DeclarativeContainer):
     domain_services = providers.DependenciesContainer()
 
     # --- Handler Factories ---
+    update_user_handler = providers.Factory(UpdateUserHandler, uow=uow)
 
     # --- Handlers Map
-    handlers = providers.Dict({})
+    handlers = providers.Dict({UpdateUserCommand: update_user_handler})
 
     # --- Bus ---
     bus = providers.Factory(CommandBus, handlers=handlers)

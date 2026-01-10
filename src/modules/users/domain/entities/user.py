@@ -16,6 +16,9 @@ class User(AggregateRoot):
     def create(cls, id: UUID, account_id: UUID, username: Username) -> "User":
         return cls(id=id, account_id=account_id, username=username)
 
+    def change_username(self, new_username: Username) -> None:
+        self.username = new_username
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, User):
             return False
